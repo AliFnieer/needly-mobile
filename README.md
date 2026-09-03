@@ -649,7 +649,7 @@ Never commit secrets, tokens, passwords, or private credentials to the repositor
 Make sure you have the following installed:
 
 - Node.js
-- npm or Yarn
+- Bun
 - Expo development environment
 - Android Studio for Android development
 - Xcode for iOS development on macOS
@@ -661,9 +661,9 @@ git clone https://github.com/AliFnieer/needly-mobile.git
 
 cd needly-mobile
 
-npm install
+bun install
 
-npm start
+bun start
 ```
 
 You can then open the application using:
@@ -677,9 +677,9 @@ You can then open the application using:
 ### Run Android
 
 ```bash
-npm run android
+bun run android
 
-npm run ios
+bun run ios
 ```
 
 ## 🧪 Testing
@@ -687,13 +687,13 @@ npm run ios
 Run the test suite:
 
 ```bash
-npm test
+bun test
 ```
 
 Run tests in watch mode:
 
 ```bash
-npm test -- --watch
+bun test -- --watch
 ```
 
 The project aims to maintain reliable coverage around the most important application behavior.
@@ -713,17 +713,17 @@ Testing priorities include:
 Before opening a pull request, make sure the project passes:
 
 ```bash
-npm run lint
+bun run lint
 
 
 and:
 
-npm test
+bun test
 
 
 TypeScript should also compile without errors.
 
-npx tsc --noEmit
+bunx tsc --noEmit
 ```
 
 ## 📋 Development Roadmap
