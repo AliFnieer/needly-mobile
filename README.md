@@ -796,7 +796,6 @@ Backend repository:
 
 [https://github.com/AliFnieer/needly-backend](https://github.com/AliFnieer/needly-backend)
 
-Replace YOUR_USERNAME with the actual GitHub organization or username.
 
 ## 🤝 Development Principles
 
