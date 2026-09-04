@@ -77,16 +77,23 @@ export const radii = {
   full: 9999,
 };
 
+export const Inter = {
+  regular: 'Inter_400Regular',
+  medium: 'Inter_500Medium',
+  semiBold: 'Inter_600SemiBold',
+  bold: 'Inter_700Bold',
+} as const;
+
 export const typography = {
-  display: { fontSize: 32, fontWeight: '700', lineHeight: 40, letterSpacing: -0.64 },
-  h1: { fontSize: 28, fontWeight: '700', lineHeight: 34, letterSpacing: -0.28 },
-  'h1-mobile': { fontSize: 24, fontWeight: '700', lineHeight: 30, letterSpacing: -0.24 },
-  h2: { fontSize: 24, fontWeight: '700', lineHeight: 30 },
-  h3: { fontSize: 20, fontWeight: '600', lineHeight: 26 },
-  'body-lg': { fontSize: 17, fontWeight: '400', lineHeight: 24 },
-  'body-md': { fontSize: 16, fontWeight: '400', lineHeight: 22 },
-  'body-sm': { fontSize: 14, fontWeight: '400', lineHeight: 20 },
-  'label-md': { fontSize: 12, fontWeight: '500', lineHeight: 16, letterSpacing: 0.24 },
+  display: { fontFamily: Inter.bold, fontSize: 32, fontWeight: '700', lineHeight: 40, letterSpacing: -0.64 },
+  h1: { fontFamily: Inter.bold, fontSize: 28, fontWeight: '700', lineHeight: 34, letterSpacing: -0.28 },
+  'h1-mobile': { fontFamily: Inter.bold, fontSize: 24, fontWeight: '700', lineHeight: 30, letterSpacing: -0.24 },
+  h2: { fontFamily: Inter.bold, fontSize: 24, fontWeight: '700', lineHeight: 30 },
+  h3: { fontFamily: Inter.semiBold, fontSize: 20, fontWeight: '600', lineHeight: 26 },
+  'body-lg': { fontFamily: Inter.regular, fontSize: 17, fontWeight: '400', lineHeight: 24 },
+  'body-md': { fontFamily: Inter.regular, fontSize: 16, fontWeight: '400', lineHeight: 22 },
+  'body-sm': { fontFamily: Inter.regular, fontSize: 14, fontWeight: '400', lineHeight: 20 },
+  'label-md': { fontFamily: Inter.medium, fontSize: 12, fontWeight: '500', lineHeight: 16, letterSpacing: 0.24 },
 };
 
 /**
