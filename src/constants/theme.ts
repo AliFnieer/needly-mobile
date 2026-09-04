@@ -84,7 +84,24 @@ export const Inter = {
   bold: 'Inter_700Bold',
 } as const;
 
-export const typography = {
+export const Tajawal = {
+  regular: 'Tajawal_400Regular',
+  medium: 'Tajawal_500Medium',
+  semiBold: 'Tajawal_700Bold',
+  bold: 'Tajawal_700Bold',
+} as const;
+
+export type Language = 'en' | 'ar';
+
+type TypographyToken = {
+  fontFamily: string;
+  fontSize: number;
+  fontWeight: '400' | '500' | '600' | '700';
+  lineHeight: number;
+  letterSpacing?: number;
+};
+
+export const typography: Record<string, TypographyToken> = {
   display: { fontFamily: Inter.bold, fontSize: 32, fontWeight: '700', lineHeight: 40, letterSpacing: -0.64 },
   h1: { fontFamily: Inter.bold, fontSize: 28, fontWeight: '700', lineHeight: 34, letterSpacing: -0.28 },
   'h1-mobile': { fontFamily: Inter.bold, fontSize: 24, fontWeight: '700', lineHeight: 30, letterSpacing: -0.24 },
@@ -95,6 +112,45 @@ export const typography = {
   'body-sm': { fontFamily: Inter.regular, fontSize: 14, fontWeight: '400', lineHeight: 20 },
   'label-md': { fontFamily: Inter.medium, fontSize: 12, fontWeight: '500', lineHeight: 16, letterSpacing: 0.24 },
 };
+
+/**
+ * Arabic Unicode blocks (incl. presentation forms). Inter has no Arabic
+ * glyphs, so strings matching this pick the Tajawal family even in an English
+ * UI: mixed-script lists (e.g. an Arabic item name under English chrome) then
+ * render in the design's Arabic font instead of a system fallback.
+ * Tajawal covers Latin + Arabic; any residual glyph gap falls back to system.
+ */
+const ARABIC_RE = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+
+/** Classify a string's script so content text can pick its own family:
+ * `typographyFor(scriptOf(text))`. UI chrome should use `typographyFor(language)`. */
+export function scriptOf(text: string): Language {
+  return ARABIC_RE.test(text) ? 'ar' : 'en';
+}
+
+/** Same scale as `typography`, with the `fontFamily` resolved for a language.
+ * Arabic sets no `letterSpacing`: spacing between Arabic glyphs breaks their
+ * cursive joins. */
+export function typographyFor(language: Language): Record<string, TypographyToken> {
+  const family = language === 'ar' ? Tajawal : Inter;
+  return Object.fromEntries(
+    Object.entries(typography).map(([name, token]) => [
+      name,
+      {
+        ...token,
+        fontFamily:
+          token.fontWeight === '700'
+            ? family.bold
+            : token.fontWeight === '600'
+              ? family.semiBold
+              : token.fontWeight === '500'
+                ? family.medium
+                : family.regular,
+        letterSpacing: language === 'ar' ? undefined : token.letterSpacing,
+      },
+    ])
+  );
+}
 
 /**
  * Semantic colors consumed by the component layer (`useThemeColor`,

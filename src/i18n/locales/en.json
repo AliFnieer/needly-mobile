@@ -1,0 +1,24 @@
+{
+  "tabs": {
+    "home": "Home",
+    "settings": "Settings"
+  },
+  "home": {
+    "welcome": "Welcome to Needly"
+  },
+  "settings": {
+    "title": "Settings",
+    "languageSection": "Language",
+    "description": "Choose the language for Needly. You can pick English, Arabic, or follow your device settings.",
+    "restartNote": "The app will restart to apply the new layout direction.",
+    "options": {
+      "system": "System default",
+      "english": "English",
+      "arabic": "Arabic"
+    }
+  },
+  "modal": {
+    "title": "This is a modal",
+    "goHome": "Go to home screen"
+  }
+}
