@@ -208,26 +208,6 @@ export function typographyFor(language: Language): Record<string, TypographyToke
   );
 }
 
-// Kept for the legacy tab layout until its themes are migrated to useTheme().
-export const Colors = {
-  light: {
-    text: palette['on-surface'],
-    background: palette.surface,
-    tint: palette.primary,
-    icon: palette['on-surface-variant'],
-    tabIconDefault: palette['on-surface-variant'],
-    tabIconSelected: palette.primary,
-  },
-  dark: {
-    text: palette['inverse-on-surface'],
-    background: palette['inverse-surface'],
-    tint: palette['inverse-primary'],
-    icon: palette['inverse-on-surface'],
-    tabIconDefault: palette['inverse-on-surface'],
-    tabIconSelected: palette['inverse-primary'],
-  },
-};
-
 export const Fonts = Platform.select({
   ios: {
     /** iOS `UIFontDescriptorSystemDesignDefault` */
