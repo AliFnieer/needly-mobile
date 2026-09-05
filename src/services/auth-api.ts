@@ -5,24 +5,26 @@ import { clearTokens, getRefreshToken, getValidAccessToken, hasRefreshToken, sto
 const ACCESS_TOKEN_TTL_S = 3600;
 
 export type User = {
-  id: string;
-  name: string;
+  id: number;
+  first_name: string;
+  last_name: string;
   email: string;
-  is_email_verified: boolean;
+  email_verified: boolean;
   created_at: string;
+  updated_at: string;
 };
 
 export type AuthResponse = {
-  user_id: string;
   access_token: string;
+  refresh_token: string;
   token_type: string;
   expires_in: number;
-  refresh_token: string;
   user: User;
 };
 
 type RegisterParams = {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
 };
@@ -79,7 +81,12 @@ setAuthHooks({
 });
 
 export async function register(params: RegisterParams): Promise<AuthResponse> {
-  const response = await apiClient.post<AuthResponse>(API_ENDPOINTS.auth.register, params);
+  const response = await apiClient.post<AuthResponse>(API_ENDPOINTS.auth.register, {
+    first_name: params.firstName.trim(),
+    last_name: params.lastName.trim(),
+    email: params.email,
+    password: params.password,
+  });
   await persistPair(response.data);
   return response.data;
 }
@@ -120,8 +127,8 @@ export async function verifyEmail(token: string): Promise<void> {
   await apiClient.get<void>(API_ENDPOINTS.auth.verifyEmail(token));
 }
 
-export async function resendVerification(email: string): Promise<void> {
-  await apiClient.post<void>(API_ENDPOINTS.auth.resendVerification, { email });
+export async function resendVerification(): Promise<void> {
+  await apiClient.post<void>(API_ENDPOINTS.auth.resendVerification, undefined, { requiresAuth: true });
 }
 
 export async function restoreSession(): Promise<User | null> {

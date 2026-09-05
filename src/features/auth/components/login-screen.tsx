@@ -31,7 +31,7 @@ export function LoginScreen() {
     setLoading(true);
     try {
       const user = await signIn(email, password);
-      if (!user.is_email_verified) {
+      if (!user.email_verified) {
         router.replace({ pathname: '/(auth)/verify', params: { mode: 'signup', email } });
       }
     } catch (e) {

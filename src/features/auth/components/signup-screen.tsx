@@ -18,14 +18,20 @@ export function SignupScreen() {
   const { cls } = useTheme();
   const typography = typographyFor(language);
   const { signUp } = useAuth();
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(false);
 
-  const canSubmit = name.length > 1 && email.length > 3 && password.length >= 6 && !loading;
+  const canSubmit =
+    firstName.trim().length > 0 &&
+    lastName.trim().length > 0 &&
+    email.length > 3 &&
+    password.length >= 6 &&
+    !loading;
 
   const onSubmit = async () => {
     if (!canSubmit) return;
@@ -36,7 +42,7 @@ export function SignupScreen() {
     setError(undefined);
     setLoading(true);
     try {
-      await signUp(name, email, password);
+      await signUp(firstName, lastName, email, password);
       router.replace({ pathname: '/(auth)/verify', params: { mode: 'signup', email } });
     } catch (e) {
       setError(e instanceof Error ? e.message : t('auth.errors.generic'));
@@ -67,15 +73,32 @@ export function SignupScreen() {
           </View>
         </View>
       }>
-      <TextField
-        label={t('auth.form.name')}
-        value={name}
-        onChangeText={setName}
-        placeholder={t('auth.form.namePlaceholder')}
-        autoComplete="name"
-        textContentType="name"
-        editable={!loading}
-      />
+      <View className="flex-row gap-sm">
+        <View className="flex-1">
+          <TextField
+            label={t('auth.form.firstName')}
+            value={firstName}
+            onChangeText={setFirstName}
+            placeholder={t('auth.form.firstNamePlaceholder')}
+            autoCapitalize="words"
+            autoComplete="given-name"
+            textContentType="givenName"
+            editable={!loading}
+          />
+        </View>
+        <View className="flex-1">
+          <TextField
+            label={t('auth.form.lastName')}
+            value={lastName}
+            onChangeText={setLastName}
+            placeholder={t('auth.form.lastNamePlaceholder')}
+            autoCapitalize="words"
+            autoComplete="family-name"
+            textContentType="familyName"
+            editable={!loading}
+          />
+        </View>
+      </View>
       <TextField
         label={t('auth.form.email')}
         value={email}

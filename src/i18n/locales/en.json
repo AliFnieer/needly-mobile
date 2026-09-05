@@ -33,6 +33,7 @@
     "title": "Welcome to Needly",
     "subtitle": "The warm utility of your everyday essentials — sorted, saved, and ready whenever you are.",
     "cta": "Get started",
+    "next": "Next",
     "feature": {
       "1": {
         "emoji": "🧺",
@@ -53,8 +54,10 @@
   },
   "auth": {
     "form": {
-      "name": "Full name",
-      "namePlaceholder": "Jane Doe",
+      "firstName": "First name",
+      "firstNamePlaceholder": "Jane",
+      "lastName": "Last name",
+      "lastNamePlaceholder": "Doe",
       "email": "Email",
       "emailPlaceholder": "you@example.com",
       "password": "Password",

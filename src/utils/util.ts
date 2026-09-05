@@ -14,3 +14,7 @@ export const API_ENDPOINTS = {
     sync: (householdId: string) => `/households/${householdId}/sync`,
   },
 } as const;
+
+export function serverHealthUrl(apiBaseUrl: string): string {
+  return `${apiBaseUrl.replace(/\/api\/v1\/?$/, '')}/health`;
+}
