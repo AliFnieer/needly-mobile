@@ -24,11 +24,11 @@ type AuthContextValue = {
   onboarded: boolean;
   user: User | null;
   signIn: (email: string, password: string) => Promise<User>;
-  signUp: (name: string, email: string, password: string) => Promise<User>;
+  signUp: (firstName: string, lastName: string, email: string, password: string) => Promise<User>;
   signOut: () => Promise<void>;
   completeOnboarding: () => Promise<void>;
   verifyEmail: (token: string) => Promise<void>;
-  resendVerification: (email: string) => Promise<void>;
+  resendVerification: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, newPassword: string) => Promise<void>;
 };
@@ -65,7 +65,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     if (sessionQuery.data === undefined) return;
     const me = sessionQuery.data;
-    if (me?.is_email_verified) {
+    if (me?.email_verified) {
       setUser(me);
       setSignedIn(true);
     }
@@ -77,8 +77,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
     return response.user;
   };
 
-  const signUp = async (name: string, email: string, password: string): Promise<User> => {
-    const response = await registerMutation.mutateAsync({ name, email, password });
+  const signUp = async (firstName: string, lastName: string, email: string, password: string): Promise<User> => {
+    const response = await registerMutation.mutateAsync({ firstName, lastName, email, password });
     return response.user;
   };
 
@@ -103,7 +103,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         signOut,
         completeOnboarding,
         verifyEmail: (token) => verifyEmailMutation.mutateAsync(token),
-        resendVerification: (email) => resendVerificationMutation.mutateAsync(email),
+        resendVerification: () => resendVerificationMutation.mutateAsync(),
         forgotPassword: (email) => forgotPasswordMutation.mutateAsync(email),
         resetPassword: (token, newPassword) => resetPasswordMutation.mutateAsync({ token, newPassword }),
       }}>

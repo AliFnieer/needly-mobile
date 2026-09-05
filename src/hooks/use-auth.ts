@@ -35,7 +35,7 @@ export function useLoginMutation() {
       const store = useAuthStore.getState();
       store.setUser(response.user);
       // Unverified logins stay signed out so the flow can redirect to verification.
-      if (response.user.is_email_verified) {
+      if (response.user.email_verified) {
         store.setSignedIn(true);
       }
       queryClient.setQueryData(authQueryKeys.session, response.user);
@@ -46,7 +46,8 @@ export function useLoginMutation() {
 export function useRegisterMutation() {
   const store = useAuthStore.getState();
   return useMutation({
-    mutationFn: (params: { name: string; email: string; password: string }) => register(params),
+    mutationFn: (params: { firstName: string; lastName: string; email: string; password: string }) =>
+      register(params),
     onSuccess: (response: AuthResponse) => {
       store.setUser(response.user);
     },
@@ -70,14 +71,14 @@ export function useVerifyEmailMutation() {
     mutationFn: (token: string) => verifyEmail(token),
     onSuccess: () => {
       const store = useAuthStore.getState();
-      store.setUser((user) => (user ? { ...user, is_email_verified: true } : user));
+      store.setUser((user) => (user ? { ...user, email_verified: true } : user));
     },
   });
 }
 
 export function useResendVerificationMutation() {
   return useMutation({
-    mutationFn: (email: string) => resendVerification(email),
+    mutationFn: () => resendVerification(),
   });
 }
 

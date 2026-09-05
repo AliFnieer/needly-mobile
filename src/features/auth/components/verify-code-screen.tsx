@@ -50,7 +50,7 @@ export function VerifyCodeScreen({ mode, email }: VerifyCodeScreenProps) {
     setError(undefined);
     setResending(true);
     try {
-      await resendVerification(email);
+      await resendVerification();
       setResendSent(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : t('auth.errors.generic'));

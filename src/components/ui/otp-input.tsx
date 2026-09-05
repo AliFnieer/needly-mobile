@@ -1,5 +1,5 @@
-import { useRef } from 'react';
-import { TextInput, View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Text, TextInput, View } from 'react-native';
 
 import { typographyFor } from '@/constants/theme';
 import { useLanguage } from '@/providers/language-provider';
@@ -17,6 +17,14 @@ export function OtpInput({ value, onChange, length = 6, autoFocus = true }: OtpI
   const { cls } = useTheme();
   const typography = typographyFor(language);
   const inputRef = useRef<TextInput>(null);
+  const nativeTextRef = useRef('');
+
+  useEffect(() => {
+    if (value === '' && nativeTextRef.current !== '') {
+      nativeTextRef.current = '';
+      inputRef.current?.clear();
+    }
+  }, [value]);
 
   const digits = value.split('');
   const activeIndex = Math.min(digits.length, length - 1);
@@ -30,8 +38,12 @@ export function OtpInput({ value, onChange, length = 6, autoFocus = true }: OtpI
       }}>
       <TextInput
         ref={inputRef}
-        value=""
-        onChangeText={(text) => onChange(text.replace(/[^0-9]/g, '').slice(0, length))}
+        defaultValue=""
+        onChangeText={(text) => {
+          const cleaned = text.replace(/[^0-9]/g, '').slice(0, length);
+          nativeTextRef.current = cleaned;
+          onChange(cleaned);
+        }}
         keyboardType="number-pad"
         maxLength={length}
         autoFocus={autoFocus}
@@ -54,13 +66,11 @@ export function OtpInput({ value, onChange, length = 6, autoFocus = true }: OtpI
                   : cls('border border-outline-variant', 'border border-outline-variant-dark'),
                 isFilled && cls('border-outline', 'border-outline-dark'),
               ].join(' ')}>
-              <TextInput
-                value={digits[index] ?? ''}
-                editable={false}
-                caretHidden
+              <Text
                 style={[typography.h2]}
-                className={cls('text-center text-on-surface', 'text-center text-on-surface-dark')}
-              />
+                className={cls('text-center text-on-surface', 'text-center text-on-surface-dark')}>
+                {digits[index] ?? ''}
+              </Text>
             </View>
           );
         })}

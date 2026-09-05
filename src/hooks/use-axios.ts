@@ -1,6 +1,10 @@
 import { AxiosError, AxiosInstance, create as createAxiosClient, isAxiosError } from 'axios';
+import { Platform } from 'react-native';
 
-const DEFAULT_API_BASE_URL = 'http://localhost:8080/api/v1';
+const DEV_API_BASE_URL = Platform.OS === 'android' ? 'http://10.0.2.2:8080/api/v1' : 'http://localhost:8080/api/v1';
+
+
+const REQUEST_TIMEOUT_MS = 15_000;
 
 declare module 'axios' {
   export interface AxiosRequestConfig {
@@ -9,7 +13,7 @@ declare module 'axios' {
   }
 }
 
-export const API_BASE_URL: string = process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_API_BASE_URL;
+export const API_BASE_URL: string = process.env.EXPO_PUBLIC_API_URL ?? DEV_API_BASE_URL;
 
 export class ApiError extends Error {
   readonly status: number;
@@ -52,6 +56,9 @@ function normalizeError(error: unknown): ApiError {
   if (error instanceof ApiError) return error;
   if (isAxiosError(error)) {
     if (!error.response) {
+      if (error.code === 'ECONNABORTED') {
+        return new ApiError(0, 'The server took too long to respond. Please try again.');
+      }
       return new ApiError(0, 'Could not reach the server. Check your connection and try again.');
     }
     const payload = error.response.data as { error?: unknown } | string | undefined;
@@ -72,7 +79,8 @@ function normalizeError(error: unknown): ApiError {
 
 export const apiClient: AxiosInstance = createAxiosClient({
   baseURL: API_BASE_URL,
-  headers: { Accept: 'application/json' },
+  timeout: REQUEST_TIMEOUT_MS,
+  headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
 });
 
 apiClient.interceptors.request.use(async (config) => {

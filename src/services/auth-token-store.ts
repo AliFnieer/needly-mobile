@@ -16,11 +16,11 @@ export type StoredTokens = {
 };
 
 export async function storeTokens({ accessToken: access, refreshToken, expiresIn }: StoredTokens): Promise<void> {
-  accessToken = access;
-  accessTokenExpiresAt = Date.now() + expiresIn * 1000;
+  accessToken = typeof access === 'string' ? access : null;
+  accessTokenExpiresAt = typeof expiresIn === 'number' ? Date.now() + expiresIn * 1000 : null;
   if (Platform.OS === 'web') {
-    webRefreshToken = refreshToken;
-  } else {
+    webRefreshToken = typeof refreshToken === 'string' ? refreshToken : null;
+  } else if (typeof refreshToken === 'string') {
     await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
   }
 }
