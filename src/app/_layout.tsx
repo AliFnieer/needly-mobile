@@ -23,6 +23,7 @@ import 'react-native-reanimated';
 import { initI18n } from '@/i18n/i18n';
 import { AuthProvider } from '@/providers/auth-provider';
 import { LanguageProvider } from '@/providers/language-provider';
+import { QueryProvider } from '@/providers/query-provider';
 import { ThemeProvider, useTheme } from '@/providers/theme-provider';
 
 SplashScreen.preventAutoHideAsync();
@@ -73,18 +74,20 @@ function RootNavigator() {
   const navigationTheme = theme === 'dark' ? DarkTheme : DefaultTheme;
 
   return (
-    <LanguageProvider>
-      <AuthProvider>
-        <NavigationThemeProvider value={navigationTheme}>
-          <Stack>
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-            <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-          </Stack>
-          <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-        </NavigationThemeProvider>
-      </AuthProvider>
-    </LanguageProvider>
+    <QueryProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <NavigationThemeProvider value={navigationTheme}>
+            <Stack>
+              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+              <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+            </Stack>
+            <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+          </NavigationThemeProvider>
+        </AuthProvider>
+      </LanguageProvider>
+    </QueryProvider>
   );
 }
