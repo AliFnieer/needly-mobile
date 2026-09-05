@@ -1,9 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getLocales } from 'expo-localization';
-import * as Updates from 'expo-updates';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import { I18nManager } from 'react-native';
+import { Platform } from 'react-native';
 
 import ar from './locales/ar.json';
 import en from './locales/en.json';
@@ -24,15 +23,15 @@ export function resolveLanguage(choice: LanguageChoice): Language {
   return choice === 'system' ? deviceLanguage() : choice;
 }
 
-/**
- * `I18nManager.forceRTL` is the single source of truth for layout direction so
- * a user-chosen language always wins, even when it contradicts the device
- * locale. Must run before first render: on the New Architecture changing
- * direction later only fully applies from a fresh launch.
- */
+// Layout direction is derived per-screen from the active language (Yoga
+// `direction` via `useLanguage()`), so RTL flips immediately on change. On web
+// this also mirrors the `dir` attribute so scrollbars/overflow follow.
 export function applyLayoutDirection(language: Language): void {
-  I18nManager.allowRTL(true);
-  I18nManager.forceRTL(language === RTL_LANGUAGE);
+  if (Platform.OS === 'web' && typeof document !== 'undefined') {
+    const dir = language === RTL_LANGUAGE ? 'rtl' : 'ltr';
+    document.documentElement?.setAttribute('dir', dir);
+    document.body?.setAttribute('dir', dir);
+  }
 }
 
 let readPromise: Promise<LanguageChoice> | null = null;
@@ -68,17 +67,15 @@ export function initI18n(): Promise<Language> {
   return initPromise;
 }
 
-/**
- * Persist the user's choice and apply it. The New Architecture only applies
- * layout direction from a cold/JS launch, so a reload is required.
- */
 export async function setLanguage(choice: LanguageChoice): Promise<void> {
-  const language = resolveLanguage(choice);
   await AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, choice);
   currentChoice = choice;
-  // eslint-disable-next-line import/no-named-as-default-member
-  await i18n.changeLanguage(language);
-  // New Architecture only applies layout direction from a fresh launch; if the
-  // reload fails, translated strings still switch immediately.
-  await Updates.reloadAsync().catch(() => undefined);
+
+  const active: Language = i18n.language?.startsWith('ar') ? 'ar' : 'en';
+  const language = resolveLanguage(choice);
+  if (language !== active) {
+    // eslint-disable-next-line import/no-named-as-default-member
+    await i18n.changeLanguage(language);
+  }
+  applyLayoutDirection(language);
 }

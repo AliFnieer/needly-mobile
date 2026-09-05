@@ -43,9 +43,13 @@
       [
         "expo-localization",
         {
-          "supportedLocales": ["en", "ar"]
+          "supportedLocales": [
+            "en",
+            "ar"
+          ]
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

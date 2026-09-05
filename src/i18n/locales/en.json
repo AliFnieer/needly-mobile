@@ -10,7 +10,15 @@
     "title": "Settings",
     "languageSection": "Language",
     "description": "Choose the language for Needly. You can pick English, Arabic, or follow your device settings.",
-    "restartNote": "The app will restart to apply the new layout direction.",
+    "restartNote": "Text and the layout direction update instantly.",
+    "appearanceSection": "Appearance",
+    "appearanceNote": "Choose how Needly looks — light, dark, or follow your device.",
+    "themeStatus": "Currently using {{theme}} mode.",
+    "theme": {
+      "system": "System default",
+      "light": "Light",
+      "dark": "Dark"
+    },
     "options": {
       "system": "System default",
       "english": "English",
@@ -20,5 +28,86 @@
   "modal": {
     "title": "This is a modal",
     "goHome": "Go to home screen"
+  },
+  "onboarding": {
+    "title": "Welcome to Needly",
+    "subtitle": "The warm utility of your everyday essentials — sorted, saved, and ready whenever you are.",
+    "cta": "Get started",
+    "feature": {
+      "1": {
+        "emoji": "🧺",
+        "title": "Never run out",
+        "body": "Build shared household lists and mark what's low before it runs out."
+      },
+      "2": {
+        "emoji": "🛍️",
+        "title": "Shop with less effort",
+        "body": "Turn lists into a shopping run with everything organized by aisle."
+      },
+      "3": {
+        "emoji": "🏡",
+        "title": "Made for the whole home",
+        "body": "Invite the people you share a roof with — everyone stays in sync."
+      }
+    }
+  },
+  "auth": {
+    "form": {
+      "name": "Full name",
+      "namePlaceholder": "Jane Doe",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "At least 6 characters",
+      "confirmPassword": "Confirm password",
+      "confirmPasswordPlaceholder": "Repeat your password",
+      "newPassword": "New password",
+      "newPasswordPlaceholder": "At least 6 characters"
+    },
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to pick up where you left off.",
+      "submit": "Sign in",
+      "forgotPassword": "Forgot password?",
+      "noAccount": "Don't have an account?",
+      "signupLink": "Create one"
+    },
+    "signup": {
+      "title": "Create your account",
+      "subtitle": "Start your Needly list in under a minute.",
+      "submit": "Create account",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in",
+      "passwordMismatch": "Passwords don't match."
+    },
+    "forgot": {
+      "title": "Forgot password",
+      "subtitle": "Enter your email and we'll send you a reset link.",
+      "submit": "Send link"
+    },
+    "verify": {
+      "signupTitle": "Verify your email",
+      "forgotTitle": "Check your email",
+      "forgotSubtitle": "We sent a password reset link to {{email}}.",
+      "forgotHelper": "Open the link in the email to choose a new password. If you don't see it, check your spam folder.",
+      "subtitle": "We sent a 6-digit code to {{email}}.",
+      "confirm": "Verify",
+      "notReceived": "Didn't get it?",
+      "resend": "Resend code",
+      "resending": "Sending…",
+      "resendSent": "Code resent — check your inbox.",
+      "backToLogin": "Back to login"
+    },
+    "reset": {
+      "title": "Reset password",
+      "subtitle": "Choose a new password for your account.",
+      "submit": "Reset password"
+    },
+    "errors": {
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "splash": {
+    "status": "Starting Needly…"
   }
 }

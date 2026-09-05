@@ -1,32 +1,35 @@
 import { Link } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet } from 'react-native';
+import { Text, View } from 'react-native';
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import { typographyFor } from '@/constants/theme';
+import { useLanguage } from '@/providers/language-provider';
+import { useTheme } from '@/providers/theme-provider';
 
 export default function ModalScreen() {
   const { t } = useTranslation();
+  const { language } = useLanguage();
+  const { cls } = useTheme();
+  const typography = typographyFor(language);
+  const direction = language === 'ar' ? 'rtl' : 'ltr';
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title">{t('modal.title')}</ThemedText>
-      <Link href="/" dismissTo style={styles.link}>
-        <ThemedText type="link">{t('modal.goHome')}</ThemedText>
+    <View
+      className={cls('flex-1 items-center justify-center p-lg bg-surface', 'flex-1 items-center justify-center p-lg bg-surface-dark')}
+      style={{ direction }}>
+      <Text style={[typography.h3]} className={cls('text-on-surface', 'text-on-surface-dark')}>
+        {t('modal.title')}
+      </Text>
+      <Link href="/" dismissTo>
+        <Text
+          style={[typography['body-md']]}
+          className={cls(
+            'mt-lg px-xl py-md font-semibold text-primary',
+            'mt-lg px-xl py-md font-semibold text-primary-dark',
+          )}>
+          {t('modal.goHome')}
+        </Text>
       </Link>
-    </ThemedView>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  link: {
-    marginTop: 15,
-    paddingVertical: 15,
-  },
-});
