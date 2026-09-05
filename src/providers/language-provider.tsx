@@ -1,38 +1,41 @@
-import { createContext, useContext, type PropsWithChildren } from 'react';
+import { createContext, useContext, useMemo, useState, type PropsWithChildren } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   currentChoice,
-  deviceLanguage,
   setLanguage as applyLanguage,
   type Language,
   type LanguageChoice,
 } from '@/i18n/i18n';
 
 type LanguageContextValue = {
-  /** Resolved language currently in effect (system choices already resolved). */
   language: Language;
-  /** Raw user choice, including 'system'. */
   choice: LanguageChoice;
   setLanguage: (choice: LanguageChoice) => Promise<void>;
 };
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-function resolveLanguage(): Language {
-  return currentChoice === 'ar' || currentChoice === 'en' ? currentChoice : deviceLanguage();
-}
-
-/**
- * Language state is effectively static: changing the language reloads the app
- * (required so the New Architecture applies the new layout direction), so the
- * value is derived once from the i18n module.
- */
+// Language state is reactive: switching re-renders this provider (via
+// `useTranslation`) and every consumer, so strings and per-screen layout
+// `direction` flip immediately — no app reload.
 export function LanguageProvider({ children }: PropsWithChildren) {
-  const value: LanguageContextValue = {
-    language: resolveLanguage(),
-    choice: currentChoice,
-    setLanguage: applyLanguage,
-  };
+  const { i18n } = useTranslation();
+  const [choice, setChoice] = useState<LanguageChoice>(() => currentChoice);
+
+  const language: Language = i18n.language?.startsWith('ar') ? 'ar' : 'en';
+
+  const value = useMemo<LanguageContextValue>(
+    () => ({
+      language,
+      choice,
+      setLanguage: async (next) => {
+        setChoice(next);
+        await applyLanguage(next);
+      },
+    }),
+    [language, choice],
+  );
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }

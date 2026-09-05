@@ -58,6 +58,62 @@ export const brand = {
   canvas: '#F8F9FA',
 };
 
+/** Material dark scheme mirror of the light `palette`. Same keys; keep in sync. */
+export const darkPalette = {
+  surface: '#16140d',
+  'surface-dim': '#0f0e07',
+  'surface-bright': '#3d3a2f',
+  'surface-container-lowest': '#0d0c06',
+  'surface-container-low': '#1e1c14',
+  'surface-container': '#232219',
+  'surface-container-high': '#2d2b21',
+  'surface-container-highest': '#38362b',
+  'on-surface': '#ece9df',
+  'on-surface-variant': '#cfc6b5',
+  'inverse-surface': '#28313c',
+  'inverse-on-surface': '#e9f1ff',
+  outline: '#98917f',
+  'outline-variant': '#4c463a',
+  'surface-tint': '#f5b82e',
+  primary: '#f5b82e',
+  'on-primary': '#3f2b00',
+  'primary-container': '#5d4200',
+  'on-primary-container': '#ffdfa3',
+  'inverse-primary': '#7b5800',
+  secondary: '#69dca1',
+  'on-secondary': '#00391f',
+  'secondary-container': '#005233',
+  'on-secondary-container': '#86f9bc',
+  tertiary: '#ffba49',
+  'on-tertiary': '#452a00',
+  'tertiary-container': '#614000',
+  'on-tertiary-container': '#ffddb1',
+  error: '#ffb4ab',
+  'on-error': '#690005',
+  'error-container': '#93000a',
+  'on-error-container': '#ffdad6',
+  'primary-fixed': '#ffdea5',
+  'primary-fixed-dim': '#fabc33',
+  'on-primary-fixed': '#261900',
+  'on-primary-fixed-variant': '#5d4200',
+  'secondary-fixed': '#86f9bc',
+  'secondary-fixed-dim': '#69dca1',
+  'on-secondary-fixed': '#002112',
+  'on-secondary-fixed-variant': '#005233',
+  'tertiary-fixed': '#ffddb1',
+  'tertiary-fixed-dim': '#ffba49',
+  'on-tertiary-fixed': '#291800',
+  'on-tertiary-fixed-variant': '#614000',
+  background: '#16140d',
+  'on-background': '#ece9df',
+  'surface-variant': '#49453a',
+} as const;
+
+export const schemes = { light: palette, dark: darkPalette } as const;
+
+export type Theme = keyof typeof schemes;
+export type ThemePreference = 'system' | Theme;
+
 export const spacing = {
   xs: 4,
   sm: 8,
@@ -152,10 +208,7 @@ export function typographyFor(language: Language): Record<string, TypographyToke
   );
 }
 
-/**
- * Semantic colors consumed by the component layer (`useThemeColor`,
- * tab bar, themed components). Keys are required by those consumers.
- */
+// Kept for the legacy tab layout until its themes are migrated to useTheme().
 export const Colors = {
   light: {
     text: palette['on-surface'],
