@@ -30,7 +30,7 @@ export function OtpInput({ value, onChange, length = 6, autoFocus = true }: OtpI
       }}>
       <TextInput
         ref={inputRef}
-        value=""
+        value={value}
         onChangeText={(text) => onChange(text.replace(/[^0-9]/g, '').slice(0, length))}
         keyboardType="number-pad"
         maxLength={length}
