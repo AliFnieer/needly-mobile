@@ -1,4 +1,5 @@
-import { apiRequest, setAuthHooks } from './api-client';
+import { apiClient, setAuthHooks } from '@/hooks/use-axios';
+import { API_ENDPOINTS } from '@/utils/api-endpoints';
 import { clearTokens, getRefreshToken, getValidAccessToken, hasRefreshToken, storeTokens } from './auth-token-store';
 
 const ACCESS_TOKEN_TTL_S = 3600;
@@ -55,12 +56,10 @@ async function doRefresh(): Promise<boolean> {
     return false;
   }
   try {
-    const response = await apiRequest<AuthResponse>('/auth/refresh', {
-      method: 'POST',
-      body: { refresh_token: refreshToken },
-      auth: false,
+    const response = await apiClient.post<AuthResponse>(API_ENDPOINTS.auth.refresh, {
+      refresh_token: refreshToken,
     });
-    await persistPair(response);
+    await persistPair(response.data);
     return true;
   } catch {
     await clearTokens();
@@ -80,54 +79,49 @@ setAuthHooks({
 });
 
 export async function register(params: RegisterParams): Promise<AuthResponse> {
-  const response = await apiRequest<AuthResponse>('/auth/register', {
-    method: 'POST',
-    body: params,
-    auth: false,
-  });
-  await persistPair(response);
-  return response;
+  const response = await apiClient.post<AuthResponse>(API_ENDPOINTS.auth.register, params);
+  await persistPair(response.data);
+  return response.data;
 }
 
 export async function login(email: string, password: string): Promise<AuthResponse> {
-  const response = await apiRequest<AuthResponse>('/auth/login', {
-    method: 'POST',
-    body: { email, password },
-    auth: false,
+  const response = await apiClient.post<AuthResponse>(API_ENDPOINTS.auth.login, {
+    email,
+    password,
   });
-  await persistPair(response);
-  return response;
+  await persistPair(response.data);
+  return response.data;
 }
 
 export async function fetchMe(): Promise<User> {
-  return apiRequest<User>('/auth/me', { auth: true });
+  const response = await apiClient.get<User>(API_ENDPOINTS.auth.me, { requiresAuth: true });
+  return response.data;
 }
 
 export async function logout(): Promise<void> {
   const refreshToken = await getRefreshToken();
   const body = refreshToken ? { refresh_token: refreshToken } : {};
-  await apiRequest<void>('/auth/logout', { method: 'POST', body, auth: true }).catch(() => undefined);
+  await apiClient.post<void>(API_ENDPOINTS.auth.logout, body, { requiresAuth: true }).catch(() => undefined);
   await clearTokens();
 }
 
 export async function forgotPassword(email: string): Promise<void> {
-  await apiRequest<void>('/auth/forgot-password', { method: 'POST', body: { email }, auth: false });
+  await apiClient.post<void>(API_ENDPOINTS.auth.forgotPassword, { email });
 }
 
 export async function resetPassword(token: string, newPassword: string): Promise<void> {
-  await apiRequest<void>('/auth/reset-password', {
-    method: 'POST',
-    body: { token, new_password: newPassword },
-    auth: false,
+  await apiClient.post<void>(API_ENDPOINTS.auth.resetPassword, {
+    token,
+    new_password: newPassword,
   });
 }
 
 export async function verifyEmail(token: string): Promise<void> {
-  await apiRequest<void>(`/auth/verify-email?token=${encodeURIComponent(token)}`, { auth: false });
+  await apiClient.get<void>(API_ENDPOINTS.auth.verifyEmail(token));
 }
 
 export async function resendVerification(email: string): Promise<void> {
-  await apiRequest<void>('/auth/resend-verification', { method: 'POST', body: { email }, auth: false });
+  await apiClient.post<void>(API_ENDPOINTS.auth.resendVerification, { email });
 }
 
 export async function restoreSession(): Promise<User | null> {
