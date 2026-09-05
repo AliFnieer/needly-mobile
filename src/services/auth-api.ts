@@ -1,5 +1,5 @@
 import { apiClient, setAuthHooks } from '@/hooks/use-axios';
-import { API_ENDPOINTS } from '@/utils/api-endpoints';
+import { API_ENDPOINTS } from '@/utils/util';
 import { clearTokens, getRefreshToken, getValidAccessToken, hasRefreshToken, storeTokens } from './auth-token-store';
 
 const ACCESS_TOKEN_TTL_S = 3600;
