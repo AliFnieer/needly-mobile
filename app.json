@@ -39,7 +39,17 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      [
+        "expo-localization",
+        {
+          "supportedLocales": [
+            "en",
+            "ar"
+          ]
+        }
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

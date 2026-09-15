@@ -1,3 +1,10 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Static light fallback; ThemeProvider matches the web page background to the
+   active theme via inline styles. Native theming is per-component. */
+html,
+body {
+  background-color: #f8f9ff;
+}
