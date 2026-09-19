@@ -5,12 +5,15 @@ import { useTranslation } from 'react-i18next';
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAuth } from '@/providers/auth-provider';
+import { useLanguage } from '@/providers/language-provider';
 import { useTheme } from '@/providers/theme-provider';
 
 export default function TabLayout() {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const { isLoading, isSignedIn } = useAuth();
+  const { language } = useLanguage();
+  const direction = language === 'ar' ? 'rtl' : 'ltr';
 
   if (isLoading) {
     return null;
@@ -26,6 +29,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: colors.primary,
         headerShown: false,
         tabBarButton: HapticTab,
+        tabBarStyle: { direction },
       }}>
       <Tabs.Screen
         name="index"
