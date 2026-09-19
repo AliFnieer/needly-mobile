@@ -8,12 +8,15 @@
   },
   "settings": {
     "title": "Settings",
+    "caption": "Personalize how Needly looks and reads.",
     "languageSection": "Language",
     "description": "Choose the language for Needly. You can pick English, Arabic, or follow your device settings.",
     "restartNote": "Text and the layout direction update instantly.",
     "appearanceSection": "Appearance",
     "appearanceNote": "Choose how Needly looks — light, dark, or follow your device.",
     "themeStatus": "Currently using {{theme}} mode.",
+    "selectedHint": "Currently selected",
+    "appVersion": "Version {{version}}",
     "theme": {
       "system": "System default",
       "light": "Light",
