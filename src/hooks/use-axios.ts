@@ -3,6 +3,8 @@ import { Platform } from 'react-native';
 
 const DEV_API_BASE_URL = Platform.OS === 'android' ? 'http://10.0.2.2:8080/api/v1' : 'http://localhost:8080/api/v1';
 
+const LEGACY_API_BASE_URLS = ['http://192.168.1.103:8080/api/v1'];
+
 
 const REQUEST_TIMEOUT_MS = 15_000;
 
@@ -10,10 +12,17 @@ declare module 'axios' {
   export interface AxiosRequestConfig {
     requiresAuth?: boolean;
     _retried?: boolean;
+    _fallbacksTried?: number;
   }
 }
 
 export const API_BASE_URL: string = process.env.EXPO_PUBLIC_API_URL ?? DEV_API_BASE_URL;
+
+const candidateBaseUrls: string[] = process.env.EXPO_PUBLIC_API_URL
+  ? Array.from(new Set([process.env.EXPO_PUBLIC_API_URL, ...LEGACY_API_BASE_URLS]))
+  : [DEV_API_BASE_URL];
+
+let activeBaseUrlIndex = 0;
 
 export class ApiError extends Error {
   readonly status: number;
@@ -78,12 +87,12 @@ function normalizeError(error: unknown): ApiError {
 }
 
 export const apiClient: AxiosInstance = createAxiosClient({
-  baseURL: API_BASE_URL,
   timeout: REQUEST_TIMEOUT_MS,
   headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
 });
 
 apiClient.interceptors.request.use(async (config) => {
+  config.baseURL = candidateBaseUrls[activeBaseUrlIndex];
   if (config.requiresAuth) {
     const token = await getAccessTokenRef?.();
     if (token) config.headers.Authorization = `Bearer ${token}`;
@@ -100,6 +109,21 @@ apiClient.interceptors.response.use(
       const refreshed = await onUnauthorizedRef?.();
       if (refreshed) return apiClient.request(config);
     }
+
+    if (
+      config &&
+      !error.response &&
+      error.code !== 'ECONNABORTED' &&
+      candidateBaseUrls.length > 1
+    ) {
+      const tried = config._fallbacksTried ?? 0;
+      if (tried < candidateBaseUrls.length - 1) {
+        config._fallbacksTried = tried + 1;
+        activeBaseUrlIndex = (activeBaseUrlIndex + 1) % candidateBaseUrls.length;
+        return apiClient.request(config);
+      }
+    }
+
     return Promise.reject(normalizeError(error));
   },
 );
