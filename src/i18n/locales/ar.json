@@ -8,12 +8,15 @@
   },
   "settings": {
     "title": "الإعدادات",
+    "caption": "خصّص شكل نيدلي ولغته.",
     "languageSection": "اللغة",
     "description": "اختر لغة نيدلي. يمكنك اختيار الإنجليزية أو العربية أو متابعة إعدادات جهازك.",
     "restartNote": "تتحدث النصوص واتجاه العرض فوراً.",
     "appearanceSection": "المظهر",
     "appearanceNote": "اختر كيف يبدو نيدلي — فاتح، داكن، أو متابعة جهازك.",
     "themeStatus": "الوضع الحالي: {{theme}}.",
+    "selectedHint": "المحدد حالياً",
+    "appVersion": "الإصدار {{version}}",
     "theme": {
       "system": "مثل النظام",
       "light": "فاتح",

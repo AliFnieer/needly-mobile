@@ -19,6 +19,14 @@ const MAPPING = {
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
+  'paintpalette.fill': 'palette',
+  'circle.lefthalf.filled': 'brightness-auto',
+  'sun.max.fill': 'light-mode',
+  'moon.fill': 'dark-mode',
+  'globe': 'language',
+  'translate': 'translate',
+  'chevron.down': 'keyboard-arrow-down',
+  'chevron.up': 'keyboard-arrow-up',
 } as IconMapping;
 
 /**
