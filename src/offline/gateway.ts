@@ -6,6 +6,12 @@ export function isOffline(): boolean {
   return !useNetworkStore.getState().isOnline;
 }
 
+// Offline-created items carry a negative temporary id until the create is
+// flushed and remapped to the real server id.
+export function isClientId(itemId: number): boolean {
+  return itemId < 0;
+}
+
 export function enqueueOutbox(op: OutboxOp): void {
   useOutboxStore.getState().enqueue(op);
 }
