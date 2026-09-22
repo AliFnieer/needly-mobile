@@ -172,7 +172,71 @@
     "retry": "Retry",
     "userLabel": "User {{id}}",
     "today": "Today",
-    "yesterday": "Yesterday"
+    "yesterday": "Yesterday",
+    "nt": {
+      "item": {
+        "created": {
+          "title": "New shopping item",
+          "body": "{{item}} was added to {{list}}"
+        },
+        "updated": {
+          "title": "Shopping item updated",
+          "body": "{{item}} was updated in {{list}}"
+        },
+        "completed": {
+          "title": "Shopping item completed",
+          "body": "{{item}} was completed in {{list}}"
+        },
+        "deleted": {
+          "title": "Shopping item deleted",
+          "body": "{{item}} was deleted from {{list}}"
+        },
+        "radded": {
+          "title": "Shopping item re-added",
+          "body": "{{item}} was re-added to {{list}}"
+        },
+        "recurred": {
+          "title": "Recurring item due again",
+          "body": "{{item}} is back on {{list}}"
+        }
+      },
+      "list": {
+        "created": {
+          "title": "New shopping list",
+          "body": "{{list}} was created"
+        },
+        "updated": {
+          "title": "Shopping list updated",
+          "body": "{{list}} was updated"
+        },
+        "deleted": {
+          "title": "Shopping list deleted",
+          "body": "{{list}} was deleted"
+        }
+      },
+      "household": {
+        "created": {
+          "title": "Household created",
+          "body": "{{household}} was created"
+        },
+        "updated": {
+          "title": "Household updated",
+          "body": "{{household}} was updated"
+        },
+        "deleted": {
+          "title": "Household deleted",
+          "body": "{{household}} was deleted"
+        },
+        "member_added": {
+          "title": "New household member",
+          "body": "A new member joined {{household}}"
+        },
+        "member_removed": {
+          "title": "Household member removed",
+          "body": "A member was removed from {{household}}"
+        }
+      }
+    }
   },
   "conflict": {
     "title": "Item changed",
