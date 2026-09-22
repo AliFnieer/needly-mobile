@@ -18,6 +18,7 @@ const MAPPING = {
   'gearshape.fill': 'settings',
   'person.3.fill': 'groups',
   'cart.fill': 'shopping-cart',
+  'clock.fill': 'history',
   'checkmark.circle.fill': 'check-circle',
   'checkmark': 'check',
   'circle': 'radio-button-unchecked',
