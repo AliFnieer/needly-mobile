@@ -48,6 +48,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="shopping"
         options={{
+          href: null,
           title: t('tabs.shopping'),
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="cart.fill" color={color} />,
         }}
