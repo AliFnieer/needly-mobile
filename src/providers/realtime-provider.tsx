@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 
 import { categoryQueryKeys } from '@/hooks/use-categories';
 import { householdQueryKeys, useHouseholdsQuery } from '@/hooks/use-households';
+import { notificationQueryKeys } from '@/hooks/use-notifications';
 import { shoppingQueryKeys } from '@/hooks/use-shopping-lists';
 import { useAuth } from '@/providers/auth-provider';
 import { queryClient } from '@/providers/query-provider';
@@ -9,7 +10,7 @@ import { RealtimeConnection, type RealtimePushEvent } from '@/services/websocket
 
 const INVALIDATE_DEBOUNCE_MS = 400;
 
-type InvalidateTarget = 'shopping' | 'households';
+type InvalidateTarget = 'shopping' | 'households' | 'notifications';
 
 const debounceTimers: Record<string, ReturnType<typeof setTimeout>> = {};
 
@@ -29,6 +30,11 @@ function scheduleInvalidate(key: InvalidateTarget, householdId?: number): void {
       return;
     }
 
+    if (key === 'notifications') {
+      queryClient.invalidateQueries({ queryKey: notificationQueryKeys.all });
+      return;
+    }
+
     queryClient.invalidateQueries({ queryKey: householdQueryKeys.all });
   }, INVALIDATE_DEBOUNCE_MS);
 }
@@ -38,11 +44,13 @@ function handleEvent(event: RealtimePushEvent): void {
 
   if (event.type.startsWith('household.')) {
     scheduleInvalidate('households');
+    scheduleInvalidate('notifications');
     return;
   }
 
   if (event.type.startsWith('list.') || event.type.startsWith('item.')) {
     scheduleInvalidate('shopping', householdId);
+    scheduleInvalidate('notifications');
   }
 }
 
