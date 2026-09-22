@@ -4,7 +4,8 @@
     "households": "Households",
     "settings": "Settings",
     "shopping": "Shopping",
-    "history": "History"
+    "history": "History",
+    "activity": "Activity"
   },
   "home": {
     "welcome": "Welcome to Needly"
@@ -158,6 +159,20 @@
     "deleteTitle": "Remove this entry?",
     "deleteBody": "\u201c{{name}}\u201d will be removed from the household history.",
     "deleteConfirm": "Remove"
+  },
+  "activity": {
+    "title": "Activity",
+    "noHouseholds": "Add a household to see activity",
+    "noHouseholdsHint": "Household actions appear here in real time.",
+    "empty": "No activity yet",
+    "emptyHint": "When members create lists, add items, or complete tasks, it shows up here.",
+    "loading": "Loading activity…",
+    "errorLoad": "Couldn't load activity. Pull down or tap retry.",
+    "errorSave": "Couldn't load activity. Please try again.",
+    "retry": "Retry",
+    "userLabel": "User {{id}}",
+    "today": "Today",
+    "yesterday": "Yesterday"
   },
   "settings": {
     "title": "Settings",

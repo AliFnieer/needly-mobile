@@ -6,7 +6,7 @@ import { ComponentProps } from 'react';
 import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
 
 type IconMapping = Record<string, ComponentProps<typeof MaterialIcons>['name']>;
-type IconSymbolName = keyof typeof MAPPING;
+export type IconSymbolName = keyof typeof MAPPING;
 
 /**
  * Add your SF Symbols to Material Icons mappings here.
@@ -19,6 +19,9 @@ const MAPPING = {
   'person.3.fill': 'groups',
   'cart.fill': 'shopping-cart',
   'clock.fill': 'history',
+  'bell.fill': 'notifications',
+  'plus.circle.fill': 'add-circle',
+  'person.fill.badge.minus': 'person-remove',
   'checkmark.circle.fill': 'check-circle',
   'checkmark': 'check',
   'circle': 'radio-button-unchecked',

@@ -55,6 +55,9 @@ export const API_ENDPOINTS = {
     list: (listId: string | number) => `/lists/${listId}/history`,
     entry: (entryId: string | number) => `/history/${entryId}`,
   },
+  notifications: {
+    household: (householdId: string | number) => `/households/${householdId}/notifications`,
+  },
 } as const;
 
 export function serverHealthUrl(apiBaseUrl: string): string {
