@@ -24,6 +24,7 @@ import { initI18n } from '@/i18n/i18n';
 import { AuthProvider } from '@/providers/auth-provider';
 import { LanguageProvider } from '@/providers/language-provider';
 import { QueryProvider } from '@/providers/query-provider';
+import { RealtimeProvider } from '@/providers/realtime-provider';
 import { ThemeProvider, useTheme } from '@/providers/theme-provider';
 
 SplashScreen.preventAutoHideAsync();
@@ -78,13 +79,15 @@ function RootNavigator() {
       <LanguageProvider>
         <AuthProvider>
           <NavigationThemeProvider value={navigationTheme}>
-            <Stack>
-              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-              <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-            </Stack>
-            <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+            <RealtimeProvider>
+              <Stack>
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+                <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+              </Stack>
+              <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+            </RealtimeProvider>
           </NavigationThemeProvider>
         </AuthProvider>
       </LanguageProvider>
