@@ -13,10 +13,44 @@ import {
   setShoppingItemCompleted,
   updateShoppingItem,
   updateShoppingList,
+  type ShoppingItem,
+  type ShoppingList,
 } from '@/services/shopping-lists-api';
 import { useNetworkStore } from '@/stores/network-store';
 
 let flushing = false;
+
+// Rewrites queued ops that referenced a temporary client id so they point at
+// the real server item, and swaps the optimistic item in the cached list.
+function remapClientItem(clientItemId: number, created: ShoppingItem, listId: number): void {
+  useOutboxStore.setState((state) => ({
+    entries: state.entries.map((entry) => {
+      const { op } = entry;
+      if (op.kind === 'set-completed' && op.itemId === clientItemId) {
+        return { ...entry, op: { ...op, itemId: created.id } };
+      }
+      if (op.kind === 'delete-item' && op.itemId === clientItemId) {
+        return { ...entry, op: { ...op, itemId: created.id } };
+      }
+      if (op.kind === 'update-item' && op.itemId === clientItemId) {
+        return {
+          ...entry,
+          op: { ...op, itemId: created.id, input: { ...op.input, base_updated_at: created.updated_at } },
+        };
+      }
+      return entry;
+    }),
+  }));
+
+  const listKey = shoppingQueryKeys.list(listId);
+  const cached = queryClient.getQueryData<ShoppingList>(listKey);
+  if (cached?.items) {
+    queryClient.setQueryData<ShoppingList>(listKey, {
+      ...cached,
+      items: cached.items.map((item) => (item.id === clientItemId ? created : item)),
+    });
+  }
+}
 
 async function executeOp(op: OutboxOp): Promise<void> {
   switch (op.kind) {
@@ -30,8 +64,9 @@ async function executeOp(op: OutboxOp): Promise<void> {
       await deleteShoppingList(op.listId);
       return;
     case 'add-item':
-      await createShoppingItem(op.listId, op.item);
-      return;
+      return createShoppingItem(op.listId, op.item).then((created) =>
+        remapClientItem(op.clientItemId, created, op.listId),
+      );
     case 'set-completed':
       await setShoppingItemCompleted(op.itemId, op.isCompleted);
       return;

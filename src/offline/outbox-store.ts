@@ -13,7 +13,7 @@ export type OutboxOp =
   | { kind: 'create-list'; householdId: number; name: string }
   | { kind: 'rename-list'; householdId: number; listId: number; name: string }
   | { kind: 'delete-list'; householdId: number; listId: number }
-  | { kind: 'add-item'; householdId: number; listId: number; item: CreateShoppingItemInput }
+  | { kind: 'add-item'; householdId: number; listId: number; clientItemId: number; item: CreateShoppingItemInput }
   | { kind: 'set-completed'; householdId: number; itemId: number; isCompleted: boolean }
   | { kind: 'update-item'; householdId: number; listId: number; itemId: number; input: OutboxUpdateItemInput }
   | { kind: 'delete-item'; householdId: number; itemId: number };
