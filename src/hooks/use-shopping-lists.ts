@@ -15,7 +15,7 @@ import {
   type ShoppingList,
 } from '@/services/shopping-lists-api';
 import { householdQueryKeys } from '@/hooks/use-households';
-import { enqueueOutbox, isOffline, onlineOrQueue } from '@/offline/gateway';
+import { enqueueOutbox, isClientId, isOffline, onlineOrQueue } from '@/offline/gateway';
 import type { OutboxUpdateItemInput } from '@/offline/outbox-store';
 import { useShoppingStore } from '@/stores/shopping-store';
 
@@ -126,8 +126,8 @@ export function useCreateShoppingItemMutation(householdId: number) {
       item: CreateShoppingItemInput;
     }): Promise<ShoppingItem> => {
       if (isOffline()) {
-        enqueueOutbox({ kind: 'add-item', householdId, listId, item });
         const optimistic = makeOptimisticItem(listId, item);
+        enqueueOutbox({ kind: 'add-item', householdId, listId, clientItemId: optimistic.id, item });
         useShoppingStore.getState().applyAdd(optimistic);
         return optimistic;
       }
@@ -140,11 +140,13 @@ export function useCreateShoppingItemMutation(householdId: number) {
 export function useToggleShoppingItemMutation(householdId: number) {
   const invalidate = useInvalidateShopping(householdId);
   return useMutation({
-    mutationFn: ({ itemId, isCompleted }: { itemId: number; isCompleted: boolean }) =>
-      onlineOrQueue(
-        () => setShoppingItemCompleted(itemId, isCompleted),
-        { kind: 'set-completed', householdId, itemId, isCompleted },
-      ),
+    mutationFn: ({ itemId, isCompleted }: { itemId: number; isCompleted: boolean }) => {
+      if (isOffline() || isClientId(itemId)) {
+        enqueueOutbox({ kind: 'set-completed', householdId, itemId, isCompleted });
+        return Promise.resolve({} as ShoppingItem);
+      }
+      return setShoppingItemCompleted(itemId, isCompleted);
+    },
     onSuccess: () => invalidate(),
   });
 }
@@ -159,7 +161,7 @@ export function useUpdateShoppingItemMutation(householdId: number) {
       itemId: number;
       input: Parameters<typeof updateShoppingItem>[1];
     }): Promise<ShoppingItem> => {
-      if (isOffline()) {
+      if (isOffline() || isClientId(itemId)) {
         const current = useShoppingStore.getState().items.find((item) => item.id === itemId);
         enqueueOutbox({
           kind: 'update-item',
@@ -179,11 +181,13 @@ export function useUpdateShoppingItemMutation(householdId: number) {
 export function useDeleteShoppingItemMutation(householdId: number) {
   const invalidate = useInvalidateShopping(householdId);
   return useMutation({
-    mutationFn: (itemId: number) =>
-      onlineOrQueue(
-        () => deleteShoppingItem(itemId),
-        { kind: 'delete-item', householdId, itemId },
-      ),
+    mutationFn: (itemId: number) => {
+      if (isOffline() || isClientId(itemId)) {
+        enqueueOutbox({ kind: 'delete-item', householdId, itemId });
+        return Promise.resolve();
+      }
+      return deleteShoppingItem(itemId);
+    },
     onSuccess: () => invalidate(),
   });
 }
