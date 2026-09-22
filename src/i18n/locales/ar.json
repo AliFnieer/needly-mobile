@@ -187,9 +187,18 @@
     "today": "اليوم",
     "yesterday": "أمس"
   },
-  "settings": {
+"settings": {
     "title": "الإعدادات",
-    "caption": "خصّص شكل نيدلي ولغته.",
+    "caption": "خصّص شكل نيدلي وقراءته.",
+    "profileSection": "الملف الشخصي",
+    "accountSignedOut": "غير مسجّل الدخول",
+    "accountSignedOutCaption": "سجّل الدخول لمزامنة حسابك.",
+    "memberSince": "عضو منذ {{date}}",
+    "signOut": "تسجيل الخروج",
+    "signOutTitle": "تسجيل الخروج؟",
+    "signOutBody": "ستحتاج إلى تسجيل الدخول مرة أخرى للوصول إلى قوائمك.",
+    "signOutConfirm": "تسجيل الخروج",
+    "cancel": "إلغاء",
     "languageSection": "اللغة",
     "description": "اختر لغة نيدلي. يمكنك اختيار الإنجليزية أو العربية أو متابعة إعدادات جهازك.",
     "restartNote": "تتحدث النصوص واتجاه العرض فوراً.",

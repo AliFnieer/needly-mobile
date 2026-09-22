@@ -2,13 +2,15 @@ import Constants from 'expo-constants';
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { Modal, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AmericanFlag, LibyanFlag } from '@/components/ui/flags';
+import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { typographyFor } from '@/constants/theme';
 import type { LanguageChoice } from '@/i18n/i18n';
+import { useAuth } from '@/providers/auth-provider';
 import { useLanguage } from '@/providers/language-provider';
 import { useTheme, type ThemePreference } from '@/providers/theme-provider';
 
@@ -51,14 +53,45 @@ export default function SettingsScreen() {
   const { t } = useTranslation();
   const { language, choice, setLanguage } = useLanguage();
   const { preference, setPreference, cls, colors } = useTheme();
+  const { user, signOut } = useAuth();
   const typography = typographyFor(language);
   const direction = language === 'ar' ? 'rtl' : 'ltr';
   const [pressedIcon, setPressedIcon] = useState(false);
   const [appearanceOpen, setAppearanceOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
+  const [signOutOpen, setSignOutOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
   const version = Constants.expoConfig?.version;
   const appName = Constants.expoConfig?.name ?? 'Needly';
+
+  const fullName = user ? `${user.first_name} ${user.last_name}`.trim() : '';
+  const initials = fullName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('');
+
+  const memberSince = user?.created_at
+    ? new Intl.DateTimeFormat(language === 'ar' ? 'ar-EG' : 'en-GB', {
+        month: 'short',
+        year: 'numeric',
+        day: 'numeric',
+      }).format(new Date(user.created_at))
+    : '';
+
+  const confirmSignOut = async () => {
+    setSigningOut(true);
+    try {
+      await signOut();
+    } catch {
+      /* session recovery happens on next launch */
+    } finally {
+      setSigningOut(false);
+      setSignOutOpen(false);
+    }
+  };
 
   const renderLanguageIcon = (value: LanguageChoice, isSelected: boolean) => {
     if (value === 'en') return <AmericanFlag width={22} />;
@@ -112,6 +145,53 @@ export default function SettingsScreen() {
           </View>
         </View>
 
+        <View className="gap-sm">
+          <Text
+            style={[typography['label-md']]}
+            className={cls('uppercase text-on-surface-variant', 'uppercase text-on-surface-variant-dark')}>
+            {t('settings.profileSection')}
+          </Text>
+          <View
+            className={cls(
+              'rounded-2xl border border-outline-variant bg-surface-container-lowest p-lg',
+              'rounded-2xl border border-outline-variant-dark bg-surface-container-lowest-dark p-lg',
+            )}>
+            <View className="flex-row items-center gap-md">
+              <View
+                className={cls(
+                  'h-14 w-14 items-center justify-center rounded-full bg-primary-container',
+                  'h-14 w-14 items-center justify-center rounded-full bg-primary-container-dark',
+                )}>
+                <Text style={[typography.h2, { color: colors['on-primary-container'] }]}>
+                  {initials || '?'}
+                </Text>
+              </View>
+              <View className="shrink flex-1 gap-xs">
+                <Text
+                  style={[typography.h3]}
+                  className={cls('text-on-surface', 'text-on-surface-dark')}
+                  numberOfLines={1}>
+                  {fullName || t('settings.accountSignedOut')}
+                </Text>
+                <Text
+                  style={[typography['body-sm']]}
+                  className={cls('text-on-surface-variant', 'text-on-surface-variant-dark')}
+                  numberOfLines={1}>
+                  {user ? user.email : t('settings.accountSignedOutCaption')}
+                </Text>
+              </View>
+            </View>
+            {memberSince ? (
+              <Text
+                style={[typography['body-sm']]}
+                className={cls('mt-md text-on-surface-variant', 'mt-md text-on-surface-variant-dark')}>
+                {t('settings.memberSince', { date: memberSince })}
+              </Text>
+            ) : null}
+          </View>
+          <Button title={t('settings.signOut')} variant="secondary" onPress={() => setSignOutOpen(true)} />
+        </View>
+
         <OptionDropdown
           caption={t('settings.appearanceSection')}
           note={t('settings.appearanceNote')}
@@ -158,6 +238,31 @@ export default function SettingsScreen() {
           </Text>
         ) : null}
       </View>
+
+      <Modal visible={signOutOpen} transparent animationType="fade" onRequestClose={() => !signingOut && setSignOutOpen(false)}>
+        <View className={cls('flex-1 justify-center bg-black/40 p-xl', 'flex-1 justify-center bg-black/60 p-xl')} style={{ direction }}>
+          <View
+            className={cls(
+              'gap-lg rounded-xl border border-outline-variant bg-surface-container-lowest p-xl',
+              'gap-lg rounded-xl border border-outline-variant-dark bg-surface-container-lowest-dark p-xl',
+            )}>
+            <Text style={[typography.h3]} className={cls('text-on-surface', 'text-on-surface-dark')}>
+              {t('settings.signOutTitle')}
+            </Text>
+            <Text style={[typography['body-sm']]} className={cls('text-on-surface-variant', 'text-on-surface-variant-dark')}>
+              {t('settings.signOutBody')}
+            </Text>
+            <View className="flex-row gap-sm">
+              <View className="flex-1">
+                <Button title={t('settings.cancel')} variant="secondary" onPress={() => setSignOutOpen(false)} disabled={signingOut} />
+              </View>
+              <View className="flex-1">
+                <Button title={t('settings.signOutConfirm')} onPress={confirmSignOut} loading={signingOut} />
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
