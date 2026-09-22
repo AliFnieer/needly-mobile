@@ -117,7 +117,7 @@
     "newCategoryPlaceholder": "e.g. Frozen",
     "categoryManagerTitle": "Category Manager",
     "categoryManagerInfo": "Household Categories",
-    "categoryManagerHint": "Reorder categories or customize color tags for \u201c{{household}}\u201d.",
+    "categoryManagerHint": "Organize the categories used by \u201c{{household}}\u201d.",
     "addNewCategory": "Add New Category",
     "categorySelected": "Selected: {{category}}",
     "categorySelectedNone": "Selected: Uncategorized",
