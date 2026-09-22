@@ -89,7 +89,7 @@ export function ItemFormSheet({
       category_id: categoryId,
     };
     if (finalUnit) payload.unit = finalUnit;
-    if (recurrence !== '') payload.recurrence_rule = recurrence;
+    payload.recurrence_rule = recurrence;
     onSubmit(payload);
   };
 
