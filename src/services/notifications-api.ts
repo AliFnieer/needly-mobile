@@ -9,6 +9,9 @@ export type ActivityNotification = {
   list_id?: number;
   item_id?: number;
   actor_id?: number;
+  item_name?: string;
+  list_name?: string;
+  household_name?: string;
   created_at: string;
 };
 

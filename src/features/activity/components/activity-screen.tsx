@@ -190,12 +190,59 @@ function iconForType(type: string): IconSymbolName {
   return 'bell.fill';
 }
 
+type NotificationNames = { item: string | undefined; list: string | undefined; household: string | undefined };
+
+const NT_NAME_FIELDS: Record<string, readonly (keyof NotificationNames)[]> = {
+  'item.created': ['item', 'list'],
+  'item.updated': ['item', 'list'],
+  'item.completed': ['item', 'list'],
+  'item.deleted': ['item', 'list'],
+  'item.radded': ['item', 'list'],
+  'item.recurred': ['item', 'list'],
+  'list.created': ['list'],
+  'list.updated': ['list'],
+  'list.deleted': ['list'],
+  'household.created': ['household'],
+  'household.updated': ['household'],
+  'household.deleted': ['household'],
+  'household.member_added': ['household'],
+  'household.member_removed': ['household'],
+};
+
+// Builds localized title/body from structured names. Older history entries
+// recorded before the server attached names fall back to the server text.
+function localizedActivityText(entry: ActivityNotification, t: TFunction): { title: string; body: string } {
+  const names: NotificationNames = {
+    item: entry.item_name,
+    list: entry.list_name,
+    household: entry.household_name,
+  };
+
+  const required = NT_NAME_FIELDS[entry.type];
+  if (!required || required.some((key) => !names[key])) {
+    return { title: entry.title, body: entry.body };
+  }
+
+  const values: Record<string, string> = {};
+  for (const key of required) values[key] = names[key] as string;
+
+  const titleKey = `activity.nt.${entry.type}.title`;
+  const bodyKey = `activity.nt.${entry.type}.body`;
+  const title = t(titleKey, values);
+  const body = t(bodyKey, values);
+  if (title === titleKey || body === bodyKey) {
+    return { title: entry.title, body: entry.body };
+  }
+  return { title, body };
+}
+
 function ActivityRow({ entry }: { entry: ActivityNotification }) {
   const { t } = useTranslation();
   const { colors, text, language } = useShoppingTokens();
   const { data: user } = useUserLookupQuery(entry.actor_id);
   const actorName = user ? `${user.first_name} ${user.last_name}`.trim() : t('activity.userLabel', { id: entry.actor_id ?? 0 });
   const icon = iconForType(entry.type);
+  const { title, body } = localizedActivityText(entry, t);
 
   return (
     <View
@@ -223,10 +270,10 @@ function ActivityRow({ entry }: { entry: ActivityNotification }) {
       </View>
       <View style={{ flex: 1, gap: 2, alignItems: 'flex-start' }}>
         <Text style={[text.itemName, { color: colors.text }]} numberOfLines={1}>
-          {entry.title}
+          {title}
         </Text>
         <Text style={[text.footer, { color: colors.secondary }]} numberOfLines={2}>
-          {entry.body}
+          {body}
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
           {entry.actor_id ? (
