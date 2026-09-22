@@ -142,6 +142,8 @@
     "deleteCategoryBody": "ستصبح العناصر في «{{name}}» بدون فئة.",
     "noCategories": "لا توجد فئات بعد",
     "noCategoriesHint": "أضِف فئة لتنظيم عناصرك.",
+    "moveUp": "تحريك لأعلى",
+    "moveDown": "تحريك لأسفل",
     "uncategorized": "أخرى",
     "recurrence": {
       "daily": "يومياً",
