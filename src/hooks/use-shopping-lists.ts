@@ -10,10 +10,14 @@ import {
   setShoppingItemCompleted,
   updateShoppingItem,
   updateShoppingList,
+  type CreateShoppingItemInput,
   type ShoppingItem,
   type ShoppingList,
 } from '@/services/shopping-lists-api';
 import { householdQueryKeys } from '@/hooks/use-households';
+import { enqueueOutbox, isOffline, onlineOrQueue } from '@/offline/gateway';
+import type { OutboxUpdateItemInput } from '@/offline/outbox-store';
+import { useShoppingStore } from '@/stores/shopping-store';
 
 export const shoppingQueryKeys = {
   all: ['shopping'] as const,
@@ -38,17 +42,51 @@ export function useShoppingListQuery(listId: number) {
 }
 
 function useInvalidateShopping(householdId: number) {
-  const queryClient = useQueryClient();
+  const queryClientInstance = useQueryClient();
   return () => {
-    queryClient.invalidateQueries({ queryKey: shoppingQueryKeys.all });
-    queryClient.invalidateQueries({ queryKey: householdQueryKeys.sync(householdId) });
+    queryClientInstance.invalidateQueries({ queryKey: shoppingQueryKeys.all });
+    queryClientInstance.invalidateQueries({ queryKey: householdQueryKeys.sync(householdId) });
+  };
+}
+
+function makeOptimisticItem(listId: number, input: Partial<CreateShoppingItemInput>): ShoppingItem {
+  return {
+    id: -Math.abs(Date.now() + Math.round(Math.random() * 10_000)),
+    list_id: listId,
+    category_id: input.category_id ?? null,
+    name: input.name ?? '',
+    quantity: input.quantity ?? 1,
+    unit: input.unit ?? '',
+    is_completed: false,
+    recurrence_rule: input.recurrence_rule ?? '',
+    next_due_at: null,
+    created_by: 0,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+}
+
+function optimisticUpdateItem(current: ShoppingItem | undefined, input: OutboxUpdateItemInput): ShoppingItem {
+  if (!current) return makeOptimisticItem(0, input);
+  return {
+    ...current,
+    name: input.name ?? current.name,
+    quantity: input.quantity ?? current.quantity,
+    unit: input.unit ?? current.unit,
+    category_id: input.category_id !== undefined ? input.category_id : current.category_id,
+    recurrence_rule: input.recurrence_rule ?? current.recurrence_rule,
+    updated_at: new Date().toISOString(),
   };
 }
 
 export function useCreateShoppingListMutation(householdId: number) {
   const invalidate = useInvalidateShopping(householdId);
   return useMutation({
-    mutationFn: (name: string) => createShoppingList(householdId, { name: name.trim() }),
+    mutationFn: async (name: string) =>
+      onlineOrQueue(
+        () => createShoppingList(householdId, { name: name.trim() }),
+        { kind: 'create-list', householdId, name: name.trim() },
+      ),
     onSuccess: () => invalidate(),
   });
 }
@@ -57,7 +95,10 @@ export function useUpdateShoppingListMutation(householdId: number) {
   const invalidate = useInvalidateShopping(householdId);
   return useMutation({
     mutationFn: ({ listId, name }: { listId: number; name: string }) =>
-      updateShoppingList(listId, { name: name.trim() }),
+      onlineOrQueue(
+        () => updateShoppingList(listId, { name: name.trim() }),
+        { kind: 'rename-list', householdId, listId, name: name.trim() },
+      ),
     onSuccess: () => invalidate(),
   });
 }
@@ -65,7 +106,11 @@ export function useUpdateShoppingListMutation(householdId: number) {
 export function useDeleteShoppingListMutation(householdId: number) {
   const invalidate = useInvalidateShopping(householdId);
   return useMutation({
-    mutationFn: (listId: number) => deleteShoppingList(listId),
+    mutationFn: (listId: number) =>
+      onlineOrQueue(
+        () => deleteShoppingList(listId),
+        { kind: 'delete-list', householdId, listId },
+      ),
     onSuccess: () => invalidate(),
   });
 }
@@ -73,13 +118,21 @@ export function useDeleteShoppingListMutation(householdId: number) {
 export function useCreateShoppingItemMutation(householdId: number) {
   const invalidate = useInvalidateShopping(householdId);
   return useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       listId,
       item,
     }: {
       listId: number;
-      item: { name: string; quantity?: number; unit?: string };
-    }) => createShoppingItem(listId, item),
+      item: CreateShoppingItemInput;
+    }): Promise<ShoppingItem> => {
+      if (isOffline()) {
+        enqueueOutbox({ kind: 'add-item', householdId, listId, item });
+        const optimistic = makeOptimisticItem(listId, item);
+        useShoppingStore.getState().applyAdd(optimistic);
+        return optimistic;
+      }
+      return createShoppingItem(listId, item);
+    },
     onSuccess: () => invalidate(),
   });
 }
@@ -88,7 +141,10 @@ export function useToggleShoppingItemMutation(householdId: number) {
   const invalidate = useInvalidateShopping(householdId);
   return useMutation({
     mutationFn: ({ itemId, isCompleted }: { itemId: number; isCompleted: boolean }) =>
-      setShoppingItemCompleted(itemId, isCompleted),
+      onlineOrQueue(
+        () => setShoppingItemCompleted(itemId, isCompleted),
+        { kind: 'set-completed', householdId, itemId, isCompleted },
+      ),
     onSuccess: () => invalidate(),
   });
 }
@@ -96,8 +152,26 @@ export function useToggleShoppingItemMutation(householdId: number) {
 export function useUpdateShoppingItemMutation(householdId: number) {
   const invalidate = useInvalidateShopping(householdId);
   return useMutation({
-    mutationFn: ({ itemId, input }: { itemId: number; input: Parameters<typeof updateShoppingItem>[1] }) =>
-      updateShoppingItem(itemId, input),
+    mutationFn: async ({
+      itemId,
+      input,
+    }: {
+      itemId: number;
+      input: Parameters<typeof updateShoppingItem>[1];
+    }): Promise<ShoppingItem> => {
+      if (isOffline()) {
+        const current = useShoppingStore.getState().items.find((item) => item.id === itemId);
+        enqueueOutbox({
+          kind: 'update-item',
+          householdId,
+          listId: current?.list_id ?? 0,
+          itemId,
+          input,
+        });
+        return optimisticUpdateItem(current, input);
+      }
+      return updateShoppingItem(itemId, input);
+    },
     onSuccess: () => invalidate(),
   });
 }
@@ -105,9 +179,13 @@ export function useUpdateShoppingItemMutation(householdId: number) {
 export function useDeleteShoppingItemMutation(householdId: number) {
   const invalidate = useInvalidateShopping(householdId);
   return useMutation({
-    mutationFn: (itemId: number) => deleteShoppingItem(itemId),
+    mutationFn: (itemId: number) =>
+      onlineOrQueue(
+        () => deleteShoppingItem(itemId),
+        { kind: 'delete-item', householdId, itemId },
+      ),
     onSuccess: () => invalidate(),
   });
 }
 
-export type { ShoppingItem, ShoppingList };
+export type { ShoppingItem, ShoppingList, CreateShoppingItemInput, OutboxUpdateItemInput };

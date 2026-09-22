@@ -19,6 +19,8 @@ import {
 } from '@/hooks/use-shopping-lists';
 import type { CreateShoppingItemInput, ShoppingCategory } from '@/services/shopping-lists-api';
 import { formatRelativeTime } from '@/utils/format-relative-time';
+import { useIsOnline } from '@/providers/network-provider';
+import { usePendingCount } from '@/offline/outbox-store';
 
 import { AvatarStack } from './avatar-stack';
 import { ItemFormSheet } from './item-form-sheet';
@@ -54,6 +56,8 @@ export function ListDetailScreen() {
   const activeHousehold = householdsQuery.data?.find((h) => h.id === householdId) ?? null;
   const memberAvatars =
     activeHousehold?.members.map((member) => ({ userId: member.user_id })) ?? [];
+  const isOnline = useIsOnline();
+  const pendingQueue = usePendingCount(householdId);
 
   const [renaming, setRenaming] = useState(false);
   const [renamingValue, setRenamingValue] = useState('');
@@ -244,6 +248,29 @@ export function ListDetailScreen() {
         </View>
         <AvatarStack members={memberAvatars} size={28} max={3} />
       </View>
+
+      {(!isOnline || pendingQueue > 0) ? (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+            paddingHorizontal: 16,
+            paddingVertical: 10,
+            backgroundColor: colors.card,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.border,
+          }}>
+          <IconSymbol name={isOnline ? 'cloud.upload' : 'wifi.slash'} size={16} color={colors.accent} />
+          <Text style={[text.footer, { color: colors.secondary, flexShrink: 1 }]}>
+            {isOnline
+              ? t('offline.syncing', { count: pendingQueue })
+              : pendingQueue > 0
+                ? t('offline.offlineWithPending', { count: pendingQueue })
+                : t('offline.offline')}
+          </Text>
+        </View>
+      ) : null}
 
       {listQuery.isLoading ? (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
