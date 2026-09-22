@@ -100,13 +100,34 @@ export function ListsOverviewScreen() {
             <Text style={[text.headerTitle, { color: colors.text }]} numberOfLines={1}>
               {noHouseholds ? t('shopping.noHouseholds') : activeHousehold?.name ?? ''}
             </Text>
-            <Text style={[text.headerSubtitle, { color: colors.secondary }]}>
-              {activeHousehold ? t('shopping.householdOf', { count: activeHousehold.members.length }) : ''}
-            </Text>
+            {activeHousehold ? <Text style={[text.headerSubtitle, { color: colors.secondary }]}>
+              {t('shopping.householdOf', { count: activeHousehold.members.length })}
+            </Text> : null}
           </View>
           <IconSymbol name="chevron.down" size={14} color={colors.secondary} />
         </Pressable>
-        <AvatarStack members={members} size={32} />
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <AvatarStack members={members} size={32} />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('shopping.categoryManagerTitle')}
+            onPress={() =>
+              activeHouseholdId ? router.push(`/shopping/categories?householdId=${activeHouseholdId}`) : undefined
+            }
+            hitSlop={8}
+            style={{
+              width: 36,
+              height: 32,
+              borderRadius: 8,
+              backgroundColor: colors.background,
+              borderWidth: 1,
+              borderColor: colors.border,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <IconSymbol name="tag.fill" size={16} color={colors.secondary} />
+          </Pressable>
+        </View>
       </View>
 
       <ScrollView

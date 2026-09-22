@@ -5,6 +5,7 @@ export default function ShoppingLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="[listId]" />
+      <Stack.Screen name="categories" />
     </Stack>
   );
 }

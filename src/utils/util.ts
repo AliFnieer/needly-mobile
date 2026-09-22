@@ -39,6 +39,16 @@ export const API_ENDPOINTS = {
     setCompleted: (itemId: string | number) => `/items/${itemId}/completed`,
     delete: (itemId: string | number) => `/items/${itemId}`,
   },
+  categories: {
+    list: (householdId: string | number) => `/households/${householdId}/categories`,
+    create: (householdId: string | number) => `/households/${householdId}/categories`,
+    get: (householdId: string | number, categoryId: string | number) =>
+      `/households/${householdId}/categories/${categoryId}`,
+    update: (householdId: string | number, categoryId: string | number) =>
+      `/households/${householdId}/categories/${categoryId}`,
+    delete: (householdId: string | number, categoryId: string | number) =>
+      `/households/${householdId}/categories/${categoryId}`,
+  },
 } as const;
 
 export function serverHealthUrl(apiBaseUrl: string): string {
