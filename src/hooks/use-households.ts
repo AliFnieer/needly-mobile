@@ -22,10 +22,11 @@ export const householdQueryKeys = {
   sync: (householdId: number) => ['households', 'sync', householdId] as const,
 };
 
-export function useHouseholdsQuery() {
+export function useHouseholdsQuery(enabled = true) {
   return useQuery({
     queryKey: householdQueryKeys.list,
     queryFn: listHouseholds,
+    enabled,
   });
 }
 

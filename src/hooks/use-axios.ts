@@ -24,6 +24,11 @@ const candidateBaseUrls: string[] = process.env.EXPO_PUBLIC_API_URL
 
 let activeBaseUrlIndex = 0;
 
+// Current base URL after fallback rotation. WebSocket URLs derive from this.
+export function getActiveBaseUrl(): string {
+  return candidateBaseUrls[activeBaseUrlIndex] ?? API_BASE_URL;
+}
+
 export class ApiError extends Error {
   readonly status: number;
   readonly retryAfter?: number;
@@ -59,6 +64,12 @@ export function setAuthHooks(handlers: {
 }): void {
   getAccessTokenRef = handlers.getAccessToken;
   onUnauthorizedRef = handlers.onUnauthorized;
+}
+
+// Returns a fresh access token (refreshing if needed) via the hook the auth
+// layer registered at init. Used by the realtime WebSocket client.
+export function getAccessToken(): Promise<string | null> {
+  return getAccessTokenRef?.() ?? Promise.resolve(null);
 }
 
 function normalizeError(error: unknown): ApiError {
