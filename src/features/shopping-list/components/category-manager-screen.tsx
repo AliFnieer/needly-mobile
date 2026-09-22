@@ -9,6 +9,7 @@ import {
   useCategoriesQuery,
   useCreateCategoryMutation,
   useDeleteCategoryMutation,
+  useReorderCategoriesMutation,
   useUpdateCategoryMutation,
   type ShoppingCategory,
 } from '@/hooks/use-categories';
@@ -35,12 +36,24 @@ export function CategoryManagerScreen() {
   const createCategoryMutation = useCreateCategoryMutation(householdId);
   const updateCategoryMutation = useUpdateCategoryMutation(householdId);
   const deleteCategoryMutation = useDeleteCategoryMutation(householdId);
+  const reorderMutation = useReorderCategoriesMutation(householdId);
 
   const [form, setForm] = useState<{ mode: 'create' | 'edit'; category?: ShoppingCategory } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ShoppingCategory | null>(null);
 
-  const categories = categoriesQuery.data ?? [];
+  const categories = [...(categoriesQuery.data ?? [])].sort(
+    (a, b) => (a.sort_order ?? a.id) - (b.sort_order ?? b.id),
+  );
   const saving = createCategoryMutation.isPending || updateCategoryMutation.isPending;
+
+  const moveCategory = (index: number, delta: -1 | 1) => {
+    const target = index + delta;
+    if (target < 0 || target >= categories.length || reorderMutation.isPending) return;
+    const next = [...categories];
+    const [moved] = next.splice(index, 1);
+    next.splice(target, 0, moved);
+    reorderMutation.mutate(next.map((category) => category.id));
+  };
 
   const goBack = () => {
     if (router.canGoBack()) router.back();
@@ -162,7 +175,7 @@ export function CategoryManagerScreen() {
           </View>
         ) : (
           <View style={{ gap: 10 }}>
-            {categories.map((category) => (
+            {categories.map((category, index) => (
               <Pressable
                 key={category.id}
                 onPress={() => openEdit(category)}
@@ -184,18 +197,62 @@ export function CategoryManagerScreen() {
                     {category.name}
                   </Text>
                 </View>
-                <View
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 16,
-                    backgroundColor: colors.background,
-                    borderWidth: 1,
-                    borderColor: colors.border,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                  <IconSymbol name="pencil" size={14} color={colors.secondary} />
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <View style={{ gap: 4 }}>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={t('shopping.moveUp')}
+                      disabled={index === 0 || reorderMutation.isPending}
+                      hitSlop={6}
+                      onPress={() => moveCategory(index, -1)}
+                      style={{
+                        width: 28,
+                        height: 20,
+                        borderRadius: 6,
+                        backgroundColor: index === 0 ? colors.badge : colors.background,
+                        borderWidth: 1,
+                        borderColor: colors.border,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      <IconSymbol name="chevron.up" size={12} color={index === 0 ? colors.secondary : colors.text} />
+                    </Pressable>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={t('shopping.moveDown')}
+                      disabled={index === categories.length - 1 || reorderMutation.isPending}
+                      hitSlop={6}
+                      onPress={() => moveCategory(index, 1)}
+                      style={{
+                        width: 28,
+                        height: 20,
+                        borderRadius: 6,
+                        backgroundColor: index === categories.length - 1 ? colors.badge : colors.background,
+                        borderWidth: 1,
+                        borderColor: colors.border,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}>
+                      <IconSymbol
+                        name="chevron.down"
+                        size={12}
+                        color={index === categories.length - 1 ? colors.secondary : colors.text}
+                      />
+                    </Pressable>
+                  </View>
+                  <View
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 16,
+                      backgroundColor: colors.background,
+                      borderWidth: 1,
+                      borderColor: colors.border,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                    <IconSymbol name="pencil" size={14} color={colors.secondary} />
+                  </View>
                 </View>
               </Pressable>
             ))}

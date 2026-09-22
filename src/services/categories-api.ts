@@ -55,4 +55,10 @@ export async function deleteCategory(householdId: number, categoryId: number): P
   });
 }
 
+export async function reorderCategories(householdId: number, categoryIds: number[]): Promise<void> {
+  await apiClient.put<void>(API_ENDPOINTS.categories.reorder(householdId), { category_ids: categoryIds }, {
+    requiresAuth: true,
+  });
+}
+
 export type { ShoppingCategory };

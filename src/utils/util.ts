@@ -48,6 +48,7 @@ export const API_ENDPOINTS = {
       `/households/${householdId}/categories/${categoryId}`,
     delete: (householdId: string | number, categoryId: string | number) =>
       `/households/${householdId}/categories/${categoryId}`,
+    reorder: (householdId: string | number) => `/households/${householdId}/categories/order`,
   },
 } as const;
 
