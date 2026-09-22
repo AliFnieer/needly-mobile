@@ -101,7 +101,7 @@ export function ListDetailScreen() {
 
   const goBack = () => {
     if (router.canGoBack()) router.back();
-    else router.replace('/shopping');
+    else router.replace('/');
   };
 
   const openCreateSheet = () => {

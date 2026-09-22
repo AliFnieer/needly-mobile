@@ -57,7 +57,7 @@ export function CategoryManagerScreen() {
 
   const goBack = () => {
     if (router.canGoBack()) router.back();
-    else router.replace('/shopping');
+    else router.replace('/');
   };
 
   const openCreate = () => {

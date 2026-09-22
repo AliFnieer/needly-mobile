@@ -185,7 +185,71 @@
     "retry": "إعادة المحاولة",
     "userLabel": "المستخدم {{id}}",
     "today": "اليوم",
-    "yesterday": "أمس"
+    "yesterday": "أمس",
+    "nt": {
+      "item": {
+        "created": {
+          "title": "عنصر جديد",
+          "body": "تمت إضافة «{{item}}» إلى «{{list}}»"
+        },
+        "updated": {
+          "title": "تم تعديل عنصر",
+          "body": "تم تعديل «{{item}}» في «{{list}}»"
+        },
+        "completed": {
+          "title": "اكتمل عنصر",
+          "body": "تم إكمال «{{item}}» في «{{list}}»"
+        },
+        "deleted": {
+          "title": "حُذف عنصر",
+          "body": "تم حذف «{{item}}» من «{{list}}»"
+        },
+        "radded": {
+          "title": "أُعيدت إضافة عنصر",
+          "body": "أُعيدت إضافة «{{item}}» إلى «{{list}}»"
+        },
+        "recurred": {
+          "title": "عنصر متكرر جديد",
+          "body": "عاد «{{item}}» إلى «{{list}}»"
+        }
+      },
+      "list": {
+        "created": {
+          "title": "قائمة جديدة",
+          "body": "تم إنشاء القائمة «{{list}}»"
+        },
+        "updated": {
+          "title": "تم تعديل قائمة",
+          "body": "تم تعديل القائمة «{{list}}»"
+        },
+        "deleted": {
+          "title": "حُذفت قائمة",
+          "body": "تم حذف القائمة «{{list}}»"
+        }
+      },
+      "household": {
+        "created": {
+          "title": "عائلة جديدة",
+          "body": "تم إنشاء العائلة «{{household}}»"
+        },
+        "updated": {
+          "title": "تم تعديل عائلة",
+          "body": "تم تعديل العائلة «{{household}}»"
+        },
+        "deleted": {
+          "title": "حُذفت عائلة",
+          "body": "تم حذف العائلة «{{household}}»"
+        },
+        "member_added": {
+          "title": "عضو جديد",
+          "body": "انضم عضو جديد إلى العائلة «{{household}}»"
+        },
+        "member_removed": {
+          "title": "إزالة عضو",
+          "body": "تمت إزالة عضو من العائلة «{{household}}»"
+        }
+      }
+    }
   },
   "conflict": {
     "title": "تغيّر العنصر",
