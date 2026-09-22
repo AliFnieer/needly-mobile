@@ -6,6 +6,7 @@ export type RecurrenceRule = '' | 'daily' | 'weekly' | 'biweekly' | 'monthly';
 export type ShoppingCategory = {
   id: number;
   name: string;
+  sort_order?: number;
 };
 
 export type ShoppingItem = {
