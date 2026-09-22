@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { AppHeader } from '@/components/ui/app-header';
 import { TextField } from '@/components/ui/text-field';
 import { typographyFor } from '@/constants/theme';
 import {
@@ -49,7 +50,6 @@ export function HouseholdsScreen() {
   const addMemberMutation = useAddHouseholdMemberMutation();
   const removeMemberMutation = useRemoveHouseholdMemberMutation();
 
-  const [pressedIcon, setPressedIcon] = useState(false);
   const [formMode, setFormMode] = useState<'create' | 'rename' | null>(null);
   const [formTarget, setFormTarget] = useState<Household | null>(null);
   const [formName, setFormName] = useState('');
@@ -147,9 +147,10 @@ export function HouseholdsScreen() {
 
   return (
     <SafeAreaView
-      className={cls('flex-1 bg-surface', 'flex-1 bg-surface-dark')}
-      edges={['top']}
-      style={{ direction }}>
+        className={cls('flex-1 bg-surface', 'flex-1 bg-surface-dark')}
+        edges={['top']}
+        style={{ direction }}>
+      <AppHeader title={t('households.title')} subtitle={t('households.caption')} />
       <ScrollView
         className={cls('flex-1', 'flex-1')}
         showsVerticalScrollIndicator={false}
@@ -160,30 +161,7 @@ export function HouseholdsScreen() {
             tintColor={colors.primary}
           />
         }
-        contentContainerClassName="my-14 gap-xl px-xl pt-md pb-xxl">
-        <View className="flex-row items-center gap-md">
-          <Pressable
-            onPressIn={() => setPressedIcon(true)}
-            onPressOut={() => setPressedIcon(false)}
-            className={[
-              'h-12 w-12 items-center justify-center rounded-2xl',
-              cls('bg-primary-container', 'bg-primary-container-dark'),
-              pressedIcon && 'opacity-80',
-            ].join(' ')}>
-            <IconSymbol name={HOUSEHOLDS_ICON} size={24} color={colors['on-primary-container']} />
-          </Pressable>
-          <View className="shrink gap-xs">
-            <Text style={[typography.h1]} className={cls('text-on-surface', 'text-on-surface-dark')}>
-              {t('households.title')}
-            </Text>
-            <Text
-              style={[typography['body-sm']]}
-              className={cls('text-on-surface-variant', 'text-on-surface-variant-dark')}>
-              {t('households.caption')}
-            </Text>
-          </View>
-        </View>
-
+        contentContainerClassName="gap-xl px-xl pt-lg pb-xxl">
         <Button title={t('households.new')} onPress={openCreate} loading={createMutation.isPending} />
 
         {actionError ? (

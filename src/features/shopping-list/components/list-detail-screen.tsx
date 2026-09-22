@@ -5,6 +5,7 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { AppHeader } from '@/components/ui/app-header';
 import { useCategoriesQuery, useCreateCategoryMutation } from '@/hooks/use-categories';
 import { useHouseholdsQuery } from '@/hooks/use-households';
 import {
@@ -211,43 +212,13 @@ export function ListDetailScreen() {
       className="flex-1"
       edges={['top']}
       style={{ direction, backgroundColor: colors.background }}>
-      <View
-        style={{
-          height: 60,
-          paddingHorizontal: 20,
-          backgroundColor: colors.card,
-          borderBottomWidth: 1,
-          borderBottomColor: colors.border,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flexShrink: 1 }}>
-          <Pressable
-            accessibilityRole="button"
-            onPress={goBack}
-            hitSlop={8}
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 16,
-              backgroundColor: colors.background,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-            <IconSymbol name={direction === 'rtl' ? 'chevron.right' : 'chevron.left'} size={16} color={colors.text} />
-          </Pressable>
-          <View style={{ gap: 2, flexShrink: 1 }}>
-            <Text style={[text.headerTitle, { color: colors.text }]} numberOfLines={1}>
-              {list?.name ?? ''}
-            </Text>
-            <Text style={[text.headerSubtitle, { color: colors.secondary }]} numberOfLines={1}>
-              {t('shopping.completedText', { done: doneCount, total: totalCount })}
-            </Text>
-          </View>
-        </View>
-        <AvatarStack members={memberAvatars} size={28} max={3} />
-      </View>
+      <AppHeader
+        back
+        onBack={goBack}
+        title={list?.name ?? ''}
+        subtitle={t('shopping.completedText', { done: doneCount, total: totalCount })}
+        right={<AvatarStack members={memberAvatars} size={28} max={3} />}
+      />
 
       {(!isOnline || pendingQueue > 0) ? (
         <View
