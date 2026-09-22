@@ -45,6 +45,9 @@ const MAPPING = {
   'translate': 'translate',
   'chevron.down': 'keyboard-arrow-down',
   'chevron.up': 'keyboard-arrow-up',
+  'wifi.slash': 'wifi-off',
+  'cloud.upload': 'cloud-upload',
+  'arrow.up.arrow.down': 'swap-vert',
 } as IconMapping;
 
 /**

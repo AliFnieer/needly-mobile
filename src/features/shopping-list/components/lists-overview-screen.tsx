@@ -15,6 +15,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useHouseholdsQuery } from '@/hooks/use-households';
 import { useCreateShoppingListMutation, useShoppingListsQuery, type ShoppingList } from '@/hooks/use-shopping-lists';
+import { usePendingCount } from '@/offline/outbox-store';
+import { useIsOnline } from '@/providers/network-provider';
 import { useLanguage } from '@/providers/language-provider';
 import { formatRelativeTime } from '@/utils/format-relative-time';
 
@@ -46,6 +48,8 @@ export function ListsOverviewScreen() {
   const lists = listsQuery.data ?? [];
   const isEmpty = !listsQuery.isLoading && lists.length === 0;
   const noHouseholds = !householdsQuery.isLoading && households.length === 0;
+  const isOnline = useIsOnline();
+  const pendingQueue = usePendingCount(activeHouseholdId ?? undefined);
 
   const openCreate = () => {
     setFormName('');
@@ -129,6 +133,29 @@ export function ListsOverviewScreen() {
           </Pressable>
         </View>
       </View>
+
+      {(!isOnline || pendingQueue > 0) ? (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+            paddingHorizontal: 20,
+            paddingVertical: 10,
+            backgroundColor: colors.card,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.border,
+          }}>
+          <IconSymbol name={isOnline ? 'cloud.upload' : 'wifi.slash'} size={15} color={colors.accent} />
+          <Text style={[text.footer, { color: colors.secondary, flexShrink: 1 }]}>
+            {isOnline
+              ? t('offline.syncing', { count: pendingQueue })
+              : pendingQueue > 0
+                ? t('offline.offlineWithPending', { count: pendingQueue })
+                : t('offline.offline')}
+          </Text>
+        </View>
+      ) : null}
 
       <ScrollView
         className="flex-1"

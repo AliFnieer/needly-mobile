@@ -23,6 +23,8 @@ import 'react-native-reanimated';
 import { initI18n } from '@/i18n/i18n';
 import { AuthProvider } from '@/providers/auth-provider';
 import { LanguageProvider } from '@/providers/language-provider';
+import { NetworkProvider } from '@/providers/network-provider';
+import { OutboxProvider } from '@/providers/outbox-provider';
 import { QueryProvider } from '@/providers/query-provider';
 import { RealtimeProvider } from '@/providers/realtime-provider';
 import { ThemeProvider, useTheme } from '@/providers/theme-provider';
@@ -76,21 +78,25 @@ function RootNavigator() {
 
   return (
     <QueryProvider>
-      <LanguageProvider>
-        <AuthProvider>
-          <NavigationThemeProvider value={navigationTheme}>
-            <RealtimeProvider>
-              <Stack>
-                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-                <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-              </Stack>
-              <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
-            </RealtimeProvider>
-          </NavigationThemeProvider>
-        </AuthProvider>
-      </LanguageProvider>
+      <NetworkProvider>
+        <OutboxProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              <NavigationThemeProvider value={navigationTheme}>
+                <RealtimeProvider>
+                  <Stack>
+                    <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                    <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+                    <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+                  </Stack>
+                  <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+                </RealtimeProvider>
+              </NavigationThemeProvider>
+            </AuthProvider>
+          </LanguageProvider>
+        </OutboxProvider>
+      </NetworkProvider>
     </QueryProvider>
   );
 }
