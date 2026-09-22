@@ -126,7 +126,7 @@
     "newCategoryPlaceholder": "مثال: مجمدات",
     "categoryManagerTitle": "إدارة الفئات",
     "categoryManagerInfo": "فئات المنزل",
-    "categoryManagerHint": "أعد ترتيب الفئات أو خصص ألوان العلامات لـ \u00ab{{household}}\u00bb.",
+    "categoryManagerHint": "نظّم الفئات المستخدمة في \u00ab{{household}}\u00bb.",
     "addNewCategory": "إضافة فئة جديدة",
     "categorySelected": "الفئة المحددة: {{category}}",
     "categorySelectedNone": "الفئة المحددة: بدون فئة",
