@@ -82,7 +82,6 @@ function buildTextStyles(language: Language) {
     quantity: xb(14),
     completedToggle: xb(14),
     completedMeta: semi(12),
-    quickAdd: med(14),
     toastTitle: bold(13),
     toastMeta: semi(11),
   };

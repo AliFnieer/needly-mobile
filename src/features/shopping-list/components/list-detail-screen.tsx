@@ -1,10 +1,11 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { useCategoriesQuery, useCreateCategoryMutation } from '@/hooks/use-categories';
 import { useHouseholdsQuery } from '@/hooks/use-households';
 import {
   useCreateShoppingItemMutation,
@@ -12,16 +13,18 @@ import {
   useDeleteShoppingListMutation,
   useShoppingListQuery,
   useToggleShoppingItemMutation,
+  useUpdateShoppingItemMutation,
   useUpdateShoppingListMutation,
   type ShoppingItem,
 } from '@/hooks/use-shopping-lists';
+import type { CreateShoppingItemInput, ShoppingCategory } from '@/services/shopping-lists-api';
 import { formatRelativeTime } from '@/utils/format-relative-time';
 
 import { AvatarStack } from './avatar-stack';
+import { ItemFormSheet } from './item-form-sheet';
 import { ConfirmModal, ListFormModal } from './shopping-modals';
 import { useShoppingTokens } from './shopping-tokens';
-
-const CATEGORY_DOTS = ['#006C45', '#3B82F6', '#F59E0B', '#7B5800', '#5C6470'];
+import { useShoppingStore } from '@/stores/shopping-store';
 
 export function ListDetailScreen() {
   const { listId } = useLocalSearchParams<{ listId: string }>();
@@ -35,9 +38,15 @@ export function ListDetailScreen() {
   const list = listQuery.data;
 
   const householdId = list?.household_id ?? 0;
+  const storeItems = useShoppingStore((state) => state.items);
+  const setStoreItems = useShoppingStore((state) => state.setItems);
+  const applyStoreToggle = useShoppingStore((state) => state.applyToggle);
+  const applyStoreRemove = useShoppingStore((state) => state.applyRemove);
+  const applyStoreUpdate = useShoppingStore((state) => state.applyUpdate);
   const toggleMutation = useToggleShoppingItemMutation(householdId);
   const deleteItemMutation = useDeleteShoppingItemMutation(householdId);
   const addItemMutation = useCreateShoppingItemMutation(householdId);
+  const updateItemMutation = useUpdateShoppingItemMutation(householdId);
   const updateListMutation = useUpdateShoppingListMutation(householdId);
   const deleteListMutation = useDeleteShoppingListMutation(householdId);
 
@@ -46,15 +55,39 @@ export function ListDetailScreen() {
   const memberAvatars =
     activeHousehold?.members.map((member) => ({ userId: member.user_id })) ?? [];
 
-  const [quickAdd, setQuickAdd] = useState('');
   const [renaming, setRenaming] = useState(false);
   const [renamingValue, setRenamingValue] = useState('');
   const [renamingError, setRenamingError] = useState<string>();
   const [deleteTarget, setDeleteTarget] = useState(false);
   const [removeItemTarget, setRemoveItemTarget] = useState<ShoppingItem | null>(null);
   const [showCompleted, setShowCompleted] = useState(false);
+  const [formNonce, setFormNonce] = useState(0);
+  const [itemForm, setItemForm] = useState<{
+    mode: 'create' | 'edit';
+    item?: ShoppingItem;
+  } | null>(null);
 
-  const items = list?.items ?? [];
+  const items = storeItems;
+
+  const categoriesQuery = useCategoriesQuery(householdId);
+  const createCategoryMutation = useCreateCategoryMutation(householdId);
+
+  const categoryOptions = useMemo<ShoppingCategory[]>(() => {
+    const fromApi = (categoriesQuery.data ?? []).slice();
+    const seen = new Set<number>(fromApi.map((category) => category.id));
+    for (const current of list?.items ?? []) {
+      if (current.category && current.category_id != null && !seen.has(current.category_id)) {
+        seen.add(current.category_id);
+        fromApi.push(current.category);
+      }
+    }
+    return fromApi;
+  }, [categoriesQuery.data, list]);
+
+  useEffect(() => {
+    setStoreItems(list?.items ?? []);
+  }, [list, setStoreItems]);
+
   const doneCount = items.filter((item) => item.is_completed).length;
   const totalCount = items.length;
 
@@ -67,17 +100,18 @@ export function ListDetailScreen() {
     else router.replace('/shopping');
   };
 
-  const canSaveQuickAdd = quickAdd.trim().length >= 1;
+  const openCreateSheet = () => {
+    addItemMutation.reset();
+    updateItemMutation.reset();
+    setFormNonce((value) => value + 1);
+    setItemForm({ mode: 'create' });
+  };
 
-  const submitQuickAdd = async () => {
-    const name = quickAdd.trim();
-    if (name.length === 0) return;
-    try {
-      await addItemMutation.mutateAsync({ listId: id, item: { name } });
-      setQuickAdd('');
-    } catch {
-      /* error surfaced via mutation; keep input for retry */
-    }
+  const openEditSheet = (item: ShoppingItem) => {
+    addItemMutation.reset();
+    updateItemMutation.reset();
+    setFormNonce((value) => value + 1);
+    setItemForm({ mode: 'edit', item });
   };
 
   const saveRename = async () => {
@@ -108,15 +142,49 @@ export function ListDetailScreen() {
 
   const confirmRemoveItem = async () => {
     if (!removeItemTarget) return;
+    applyStoreRemove(removeItemTarget.id);
     try {
       await deleteItemMutation.mutateAsync(removeItemTarget.id);
+    } catch {
+      setStoreItems(list?.items ?? []);
     } finally {
       setRemoveItemTarget(null);
     }
   };
 
   const toggleItem = (item: ShoppingItem) => {
-    toggleMutation.mutate({ itemId: item.id, isCompleted: !item.is_completed });
+    const next = !item.is_completed;
+    applyStoreToggle(item.id, next);
+    toggleMutation.mutate({ itemId: item.id, isCompleted: next }, {
+      onError: () => applyStoreToggle(item.id, !next),
+    });
+  };
+
+  const submitItemForm = async (input: CreateShoppingItemInput) => {
+    const target = itemForm;
+    if (!target) return;
+    try {
+      if (target.mode === 'edit' && target.item) {
+        const updated = await updateItemMutation.mutateAsync({
+          itemId: target.item.id,
+          input: { ...input, base_updated_at: target.item.updated_at },
+        });
+        applyStoreUpdate(updated);
+      } else {
+        await addItemMutation.mutateAsync({ listId: id, item: input });
+      }
+      setItemForm(null);
+    } catch {
+      /* error recorded on mutation and surfaced via the sheet's `error` prop */
+    }
+  };
+
+  const createCategoryHandler = async (name: string): Promise<ShoppingCategory | null> => {
+    try {
+      return await createCategoryMutation.mutateAsync({ name: name.trim() });
+    } catch {
+      return null;
+    }
   };
 
   if (!listQuery.isLoading && !list) {
@@ -163,7 +231,7 @@ export function ListDetailScreen() {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-            <IconSymbol name="chevron.left" size={16} color={colors.text} />
+            <IconSymbol name={direction === 'rtl' ? 'chevron.right' : 'chevron.left'} size={16} color={colors.text} />
           </Pressable>
           <View style={{ gap: 2, flexShrink: 1 }}>
             <Text style={[text.headerTitle, { color: colors.text }]} numberOfLines={1}>
@@ -185,7 +253,7 @@ export function ListDetailScreen() {
         <ScrollView
           className="flex-1"
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ padding: 16, gap: 24, paddingBottom: 32 }}>
+          contentContainerStyle={{ padding: 16, gap: 24, paddingBottom: 96 }}>
           {grouped.length === 0 && completedItems.length === 0 ? (
             <View style={{ gap: 8, paddingVertical: 32 }}>
               <IconSymbol name="cart.fill" size={48} color={colors.secondary} style={{ alignSelf: 'center' }} />
@@ -196,17 +264,9 @@ export function ListDetailScreen() {
             </View>
           ) : (
             <>
-              {grouped.map((group, groupIndex) => (
+              {grouped.map((group) => (
                 <View key={group.key} style={{ gap: 12 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingLeft: 4 }}>
-                    <View
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: 4,
-                        backgroundColor: CATEGORY_DOTS[groupIndex % CATEGORY_DOTS.length],
-                      }}
-                    />
                     <Text style={[text.categoryLabel, { color: colors.secondary, textTransform: 'uppercase' }]}>
                       {group.key === 'uncategorized' ? t('shopping.uncategorized') : group.name}
                     </Text>
@@ -217,6 +277,7 @@ export function ListDetailScreen() {
                       item={item}
                       toggling={toggleMutation.isPending}
                       onToggle={() => toggleItem(item)}
+                      onEdit={() => openEditSheet(item)}
                       onRemove={() => setRemoveItemTarget(item)}
                     />
                   ))}
@@ -241,13 +302,14 @@ export function ListDetailScreen() {
                     <IconSymbol name={showCompleted ? 'chevron.up' : 'chevron.down'} size={16} color={colors.secondary} />
                   </Pressable>
                   {showCompleted
-                    ? completedItems.map((item) => (
-                        <CompletedRow
-                          key={item.id}
-                          item={item}
-                          onRemove={() => setRemoveItemTarget(item)}
-                        />
-                      ))
+? completedItems.map((item) => (
+                          <CompletedRow
+                            key={item.id}
+                            item={item}
+                            onToggle={() => toggleItem(item)}
+                            onRemove={() => setRemoveItemTarget(item)}
+                          />
+                        ))
                     : null}
                 </View>
               ) : null}
@@ -258,58 +320,30 @@ export function ListDetailScreen() {
 
       <View
         style={{
-          paddingHorizontal: 16,
-          paddingVertical: 12,
-          gap: 12,
-          backgroundColor: colors.card,
-          borderTopWidth: 1,
-          borderTopColor: colors.border,
-          flexDirection: 'row',
-          alignItems: 'center',
-          flexShrink: 1,
+          position: 'absolute',
+          bottom: 20,
+          ...(language === 'ar' ? { left: 20 } : { right: 20 }),
         }}>
-        <View
-          style={{
-            flex: 1,
-            height: 44,
-            borderRadius: 22,
-            paddingHorizontal: 16,
-            backgroundColor: colors.background,
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 8,
-          }}>
-          <IconSymbol name="plus" size={16} color={colors.secondary} />
-          <TextInput
-            value={quickAdd}
-            onChangeText={setQuickAdd}
-            placeholder={t('shopping.quickAddPlaceholder')}
-            placeholderTextColor={colors.secondary}
-            style={[text.quickAdd, { color: colors.text, flex: 1, paddingVertical: 0 }]}
-            autoCorrect={false}
-            returnKeyType="send"
-            onSubmitEditing={submitQuickAdd}
-          />
-        </View>
         <Pressable
           accessibilityRole="button"
-          onPress={submitQuickAdd}
-          disabled={!canSaveQuickAdd}
+          accessibilityLabel={t('shopping.addItem')}
+          onPress={openCreateSheet}
           style={{
-            width: 44,
-            height: 44,
-            borderRadius: 22,
-            backgroundColor: canSaveQuickAdd ? colors.accent : colors.badge,
-            borderWidth: 1,
-            borderColor: canSaveQuickAdd ? colors.borderStrong : colors.border,
+            width: 56,
+            height: 56,
+            borderRadius: 28,
+            backgroundColor: colors.accent,
+            borderWidth: 1.5,
+            borderColor: colors.borderStrong,
             alignItems: 'center',
             justifyContent: 'center',
+            elevation: 6,
+            shadowColor: '#131C26',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.2,
+            shadowRadius: 8,
           }}>
-          {addItemMutation.isPending ? (
-            <ActivityIndicator color={canSaveQuickAdd ? colors.accentText : colors.secondary} size="small" />
-          ) : (
-            <IconSymbol name="arrow.up" size={18} color={canSaveQuickAdd ? colors.accentText : colors.secondary} />
-          )}
+          <IconSymbol name="plus" size={26} color={colors.accentText} />
         </Pressable>
       </View>
 
@@ -345,6 +379,24 @@ export function ListDetailScreen() {
           onConfirm={confirmRemoveItem}
         />
       ) : null}
+
+      <ItemFormSheet
+        key={`${formNonce}:${itemForm?.mode ?? 'closed'}:${itemForm?.item?.id ?? ''}`}
+        visible={itemForm !== null}
+        mode={itemForm?.mode ?? 'create'}
+        listName={list?.name ?? ''}
+        item={itemForm?.item ?? null}
+        categories={categoryOptions}
+        saving={addItemMutation.isPending || updateItemMutation.isPending}
+        error={
+          itemForm && (addItemMutation.error ?? updateItemMutation.error)
+            ? (addItemMutation.error ?? updateItemMutation.error)?.message
+            : null
+        }
+        onCreateCategory={createCategoryHandler}
+        onClose={() => !(addItemMutation.isPending || updateItemMutation.isPending) && setItemForm(null)}
+        onSubmit={submitItemForm}
+      />
     </SafeAreaView>
   );
 }
@@ -368,10 +420,11 @@ type ItemRowProps = {
   item: ShoppingItem;
   toggling: boolean;
   onToggle: () => void;
+  onEdit: () => void;
   onRemove: () => void;
 };
 
-function ItemRow({ item, toggling, onToggle, onRemove }: ItemRowProps) {
+function ItemRow({ item, toggling, onToggle, onEdit, onRemove }: ItemRowProps) {
   const { t } = useTranslation();
   const { colors, text } = useShoppingTokens();
   const recurrence = item.recurrence_rule ? t(`shopping.recurrence.${item.recurrence_rule}`) : '';
@@ -433,14 +486,19 @@ function ItemRow({ item, toggling, onToggle, onRemove }: ItemRowProps) {
           </Text>
         ) : null}
       </View>
-      <Pressable onPress={onRemove} accessibilityRole="button" hitSlop={8}>
-        <IconSymbol name="trash" size={18} color={colors.error} />
-      </Pressable>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <Pressable onPress={onEdit} accessibilityRole="button" accessibilityLabel={t('shopping.editItem')} hitSlop={8}>
+          <IconSymbol name="pencil" size={18} color={colors.secondary} />
+        </Pressable>
+        <Pressable onPress={onRemove} accessibilityRole="button" accessibilityLabel={t('shopping.removeItem')} hitSlop={8}>
+          <IconSymbol name="trash" size={18} color={colors.error} />
+        </Pressable>
+      </View>
     </View>
   );
 }
 
-function CompletedRow({ item, onRemove }: { item: ShoppingItem; onRemove: () => void }) {
+function CompletedRow({ item, onToggle, onRemove }: { item: ShoppingItem; onToggle: () => void; onRemove: () => void }) {
   const { colors, text, language } = useShoppingTokens();
 
   return (
@@ -458,7 +516,11 @@ function CompletedRow({ item, onRemove }: { item: ShoppingItem; onRemove: () => 
         opacity: 0.6,
       }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flexShrink: 1 }}>
-        <View
+        <Pressable
+          onPress={onToggle}
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: true }}
+          hitSlop={8}
           style={{
             width: 24,
             height: 24,
@@ -468,7 +530,7 @@ function CompletedRow({ item, onRemove }: { item: ShoppingItem; onRemove: () => 
             justifyContent: 'center',
           }}>
           <IconSymbol name="checkmark" size={14} color={colors.card} />
-        </View>
+        </Pressable>
         <Text
           style={[text.itemName, { color: colors.text, textDecorationLine: 'line-through' }]}
           numberOfLines={1}>

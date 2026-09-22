@@ -8,6 +8,7 @@ import {
   getShoppingList,
   listShoppingLists,
   setShoppingItemCompleted,
+  updateShoppingItem,
   updateShoppingList,
   type ShoppingItem,
   type ShoppingList,
@@ -88,6 +89,15 @@ export function useToggleShoppingItemMutation(householdId: number) {
   return useMutation({
     mutationFn: ({ itemId, isCompleted }: { itemId: number; isCompleted: boolean }) =>
       setShoppingItemCompleted(itemId, isCompleted),
+    onSuccess: () => invalidate(),
+  });
+}
+
+export function useUpdateShoppingItemMutation(householdId: number) {
+  const invalidate = useInvalidateShopping(householdId);
+  return useMutation({
+    mutationFn: ({ itemId, input }: { itemId: number; input: Parameters<typeof updateShoppingItem>[1] }) =>
+      updateShoppingItem(itemId, input),
     onSuccess: () => invalidate(),
   });
 }
