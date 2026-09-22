@@ -5,6 +5,7 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { AppHeader } from '@/components/ui/app-header';
 import {
   useCategoriesQuery,
   useCreateCategoryMutation,
@@ -101,35 +102,7 @@ export function CategoryManagerScreen() {
       className="flex-1"
       edges={['top']}
       style={{ direction, backgroundColor: colors.background }}>
-      <View
-        style={{
-          height: 60,
-          paddingHorizontal: 20,
-          backgroundColor: colors.card,
-          borderBottomWidth: 1,
-          borderBottomColor: colors.border,
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 12,
-        }}>
-        <Pressable
-          accessibilityRole="button"
-          onPress={goBack}
-          hitSlop={8}
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: 16,
-            backgroundColor: colors.background,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-          <IconSymbol name={direction === 'rtl' ? 'chevron.right' : 'chevron.left'} size={16} color={colors.text} />
-        </Pressable>
-        <Text style={[text.headerTitle, { color: colors.text }]} numberOfLines={1}>
-          {t('shopping.categoryManagerTitle')}
-        </Text>
-      </View>
+      <AppHeader back onBack={goBack} title={t('shopping.categoryManagerTitle')} />
 
       <ScrollView
         className="flex-1"

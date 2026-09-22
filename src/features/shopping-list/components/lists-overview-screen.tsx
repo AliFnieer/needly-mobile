@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { AppHeader } from '@/components/ui/app-header';
 import { useHouseholdsQuery } from '@/hooks/use-households';
 import { useCreateShoppingListMutation, useShoppingListsQuery, type ShoppingList } from '@/hooks/use-shopping-lists';
 import { usePendingCount } from '@/offline/outbox-store';
@@ -84,55 +85,37 @@ export function ListsOverviewScreen() {
       className="flex-1"
       edges={['top']}
       style={{ direction, backgroundColor: colors.background }}>
-      <View
-        style={{
-          height: 60,
-          paddingHorizontal: 20,
-          backgroundColor: colors.card,
-          borderBottomWidth: 1,
-          borderBottomColor: colors.border,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}>
-        <Pressable
-          accessibilityRole="button"
-          hitSlop={8}
-          onPress={() => setPickerOpen(true)}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <View style={{ gap: 2 }}>
-            <Text style={[text.headerTitle, { color: colors.text }]} numberOfLines={1}>
-              {noHouseholds ? t('shopping.noHouseholds') : activeHousehold?.name ?? ''}
-            </Text>
-            {activeHousehold ? <Text style={[text.headerSubtitle, { color: colors.secondary }]}>
-              {t('shopping.householdOf', { count: activeHousehold.members.length })}
-            </Text> : null}
-          </View>
-          <IconSymbol name="chevron.down" size={14} color={colors.secondary} />
-        </Pressable>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <AvatarStack members={members} size={32} />
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('shopping.categoryManagerTitle')}
-            onPress={() =>
-              activeHouseholdId ? router.push(`/shopping/categories?householdId=${activeHouseholdId}`) : undefined
-            }
-            hitSlop={8}
-            style={{
-              width: 36,
-              height: 32,
-              borderRadius: 8,
-              backgroundColor: colors.background,
-              borderWidth: 1,
-              borderColor: colors.border,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-            <IconSymbol name="tag.fill" size={16} color={colors.secondary} />
-          </Pressable>
-        </View>
-      </View>
+      <AppHeader
+        title={noHouseholds ? t('shopping.noHouseholds') : activeHousehold?.name ?? ''}
+        subtitle={activeHousehold ? t('shopping.householdOf', { count: activeHousehold.members.length }) : null}
+        onTitlePress={() => setPickerOpen(true)}
+        titleLabel={t('shopping.selectHousehold')}
+        titleAccessory={<IconSymbol name="chevron.down" size={14} color={colors.secondary} />}
+        right={
+          <>
+            <AvatarStack members={members} size={32} />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('shopping.categoryManagerTitle')}
+              onPress={() =>
+                activeHouseholdId ? router.push(`/shopping/categories?householdId=${activeHouseholdId}`) : undefined
+              }
+              hitSlop={8}
+              style={{
+                width: 36,
+                height: 32,
+                borderRadius: 8,
+                backgroundColor: colors.background,
+                borderWidth: 1,
+                borderColor: colors.border,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <IconSymbol name="tag.fill" size={16} color={colors.secondary} />
+            </Pressable>
+          </>
+        }
+      />
 
       {(!isOnline || pendingQueue > 0) ? (
         <View
