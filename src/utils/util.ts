@@ -24,6 +24,31 @@ export const API_ENDPOINTS = {
       `/households/${householdId}/members/${userId}`,
     sync: (householdId: string | number) => `/households/${householdId}/sync`,
   },
+  shoppingLists: {
+    list: (householdId: string | number) => `/households/${householdId}/lists`,
+    create: (householdId: string | number) => `/households/${householdId}/lists`,
+    get: (listId: string | number) => `/lists/${listId}`,
+    update: (listId: string | number) => `/lists/${listId}`,
+    delete: (listId: string | number) => `/lists/${listId}`,
+  },
+  shoppingItems: {
+    list: (listId: string | number) => `/lists/${listId}/items`,
+    create: (listId: string | number) => `/lists/${listId}/items`,
+    get: (itemId: string | number) => `/items/${itemId}`,
+    update: (itemId: string | number) => `/items/${itemId}`,
+    setCompleted: (itemId: string | number) => `/items/${itemId}/completed`,
+    delete: (itemId: string | number) => `/items/${itemId}`,
+  },
+  categories: {
+    list: (householdId: string | number) => `/households/${householdId}/categories`,
+    create: (householdId: string | number) => `/households/${householdId}/categories`,
+    get: (householdId: string | number, categoryId: string | number) =>
+      `/households/${householdId}/categories/${categoryId}`,
+    update: (householdId: string | number, categoryId: string | number) =>
+      `/households/${householdId}/categories/${categoryId}`,
+    delete: (householdId: string | number, categoryId: string | number) =>
+      `/households/${householdId}/categories/${categoryId}`,
+  },
 } as const;
 
 export function serverHealthUrl(apiBaseUrl: string): string {
