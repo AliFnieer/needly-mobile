@@ -50,6 +50,11 @@ export const API_ENDPOINTS = {
       `/households/${householdId}/categories/${categoryId}`,
     reorder: (householdId: string | number) => `/households/${householdId}/categories/order`,
   },
+  history: {
+    household: (householdId: string | number) => `/households/${householdId}/history`,
+    list: (listId: string | number) => `/lists/${listId}/history`,
+    entry: (entryId: string | number) => `/history/${entryId}`,
+  },
 } as const;
 
 export function serverHealthUrl(apiBaseUrl: string): string {

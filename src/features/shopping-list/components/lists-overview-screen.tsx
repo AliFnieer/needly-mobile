@@ -334,7 +334,7 @@ type HouseholdPickerProps = {
   onSelect: (id: number) => void;
 };
 
-function HouseholdPickerModal({ visible, households, selectedId, onClose, onSelect }: HouseholdPickerProps) {
+export function HouseholdPickerModal({ visible, households, selectedId, onClose, onSelect }: HouseholdPickerProps) {
   const { t } = useTranslation();
   const { colors, text } = useShoppingTokens();
   const { language } = useLanguage();

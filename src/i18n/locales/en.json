@@ -3,7 +3,8 @@
     "home": "Home",
     "households": "Households",
     "settings": "Settings",
-    "shopping": "Shopping"
+    "shopping": "Shopping",
+    "history": "History"
   },
   "home": {
     "welcome": "Welcome to Needly"
@@ -138,6 +139,25 @@
       "biweekly": "Bi-weekly",
       "monthly": "Monthly"
     }
+  },
+  "history": {
+    "title": "History",
+    "noHouseholds": "Add a household to see history",
+    "noHouseholdsHint": "Completed items appear here for the whole household.",
+    "empty": "No completed items yet",
+    "emptyHint": "Items you check off will appear here for everyone in the household.",
+    "loading": "Loading history…",
+    "errorLoad": "Couldn't load history. Pull down or tap retry.",
+    "errorSave": "Couldn't save. Please try again.",
+    "retry": "Retry",
+    "completedBy": "Completed by {{name}}",
+    "userLabel": "User {{id}}",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "deleteEntry": "Delete entry",
+    "deleteTitle": "Remove this entry?",
+    "deleteBody": "\u201c{{name}}\u201d will be removed from the household history.",
+    "deleteConfirm": "Remove"
   },
   "settings": {
     "title": "Settings",
