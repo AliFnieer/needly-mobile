@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AmericanFlag, LibyanFlag } from '@/components/ui/flags';
 import { Button } from '@/components/ui/button';
+import { AppHeader } from '@/components/ui/app-header';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { typographyFor } from '@/constants/theme';
 import type { LanguageChoice } from '@/i18n/i18n';
@@ -31,8 +32,6 @@ type LanguageOption = {
   labelKey: 'settings.options.system' | 'settings.options.english' | 'settings.options.arabic';
 };
 
-const SETTINGS_ICON = 'gearshape.fill';
-
 const LANGUAGE_OPTIONS: LanguageOption[] = [
   { value: 'system', labelKey: 'settings.options.system' },
   { value: 'en', labelKey: 'settings.options.english' },
@@ -56,7 +55,6 @@ export default function SettingsScreen() {
   const { user, signOut } = useAuth();
   const typography = typographyFor(language);
   const direction = language === 'ar' ? 'rtl' : 'ltr';
-  const [pressedIcon, setPressedIcon] = useState(false);
   const [appearanceOpen, setAppearanceOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
   const [signOutOpen, setSignOutOpen] = useState(false);
@@ -115,36 +113,14 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView
-      className={cls('flex-1 bg-surface', 'flex-1 bg-surface-dark')}
-      edges={['top']}
-      style={{ direction }}>
+        className={cls('flex-1 bg-surface', 'flex-1 bg-surface-dark')}
+        edges={['top']}
+        style={{ direction }}>
+      <AppHeader title={t('settings.title')} subtitle={t('settings.caption')} />
       <ScrollView
         className={cls('flex-1', 'flex-1')}
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="my-14 gap-xl px-xl pt-md pb-xxl">
-        <View className="flex-row items-center gap-md">
-          <Pressable
-            onPressIn={() => setPressedIcon(true)}
-            onPressOut={() => setPressedIcon(false)}
-            className={[
-              'h-12 w-12 items-center justify-center rounded-2xl',
-              cls('bg-primary-container', 'bg-primary-container-dark'),
-              pressedIcon && 'opacity-80',
-            ].join(' ')}>
-            <IconSymbol name={SETTINGS_ICON} size={24} color={colors['on-primary-container']} />
-          </Pressable>
-          <View className="shrink gap-xs">
-            <Text style={[typography.h1]} className={cls('text-on-surface', 'text-on-surface-dark')}>
-              {t('settings.title')}
-            </Text>
-            <Text
-              style={[typography['body-sm']]}
-              className={cls('text-on-surface-variant', 'text-on-surface-variant-dark')}>
-              {t('settings.caption')}
-            </Text>
-          </View>
-        </View>
-
+        contentContainerClassName="gap-xl px-xl pt-lg pb-xxl">
         <View className="gap-sm">
           <Text
             style={[typography['label-md']]}

@@ -4,6 +4,7 @@ import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { AppHeader } from '@/components/ui/app-header';
 import { useHouseholdsQuery } from '@/hooks/use-households';
 import { useDeleteHistoryEntryMutation, useHouseholdHistoryQuery, type ShoppingHistoryEntry } from '@/hooks/use-history';
 import { useUserLookupQuery } from '@/hooks/use-users';
@@ -96,40 +97,29 @@ export function HistoryScreen() {
       className="flex-1"
       edges={['top']}
       style={{ direction, backgroundColor: colors.background }}>
-      <View
-        style={{
-          height: 60,
-          paddingHorizontal: 20,
-          backgroundColor: colors.card,
-          borderBottomWidth: 1,
-          borderBottomColor: colors.border,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}>
-        <View style={{ gap: 2, flexShrink: 1 }}>
-          <Text style={[text.headerTitle, { color: colors.text }]} numberOfLines={1}>
-            {t('history.title')}
-          </Text>
-          <Text style={[text.headerSubtitle, { color: colors.secondary }]} numberOfLines={1}>
-            {noHouseholds
-              ? t('shopping.noHouseholds')
-              : activeHousehold
-                ? `${activeHousehold.name} · ${t('shopping.householdOf', { count: activeHousehold.members.length })}`
-                : ''}
-          </Text>
-        </View>
-        {activeHousehold ? (
-          <Pressable
-            accessibilityRole="button"
-            hitSlop={8}
-            onPress={() => setPickerOpen(true)}
-            style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 6, paddingHorizontal: 10 }}>
-            <AvatarStack members={members} size={24} max={3} />
-            <IconSymbol name="chevron.down" size={14} color={colors.secondary} />
-          </Pressable>
-        ) : null}
-      </View>
+      <AppHeader
+        title={t('history.title')}
+        subtitle={
+          noHouseholds
+            ? t('shopping.noHouseholds')
+            : activeHousehold
+              ? `${activeHousehold.name} · ${t('shopping.householdOf', { count: activeHousehold.members.length })}`
+              : null
+        }
+        right={
+          activeHousehold ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('shopping.selectHousehold')}
+              hitSlop={8}
+              onPress={() => setPickerOpen(true)}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 6, paddingHorizontal: 10 }}>
+              <AvatarStack members={members} size={24} max={3} />
+              <IconSymbol name="chevron.down" size={14} color={colors.secondary} />
+            </Pressable>
+          ) : null
+        }
+      />
 
       <ScrollView
         className="flex-1"
